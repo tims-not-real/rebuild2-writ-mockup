@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writ — one sentence, edit by edit</title>
+<meta name="description" content="One sentence, four edits. Wording merges on its own; a change of meaning stops and waits for a person.">
+<!--
+  One sentence, edit by edit — built from scratch for this repo.
+
+  The two animations beside it argue the case at the level of a whole document.
+  This one slows down to a single sentence and shows the rule working edit by
+  edit: wording merges on its own, and a change of meaning stops and waits for
+  a named person, who can approve it or block it.
+
+  The sentence is the fare rule from the Rebuild 2 hackathon explainer. The
+  handles are invented.
+-->
+<style>
+:root{
+  --bg:#faf9f6; --ink:#1c1b18; --muted:#77726a; --hair:rgba(28,27,24,0.16);
+  --meaning:#b8781a; --wording:#2f7d4f; --blocked:#b3362b;
+  --tint-w:rgba(47,125,79,0.13); --tint-m:rgba(184,120,26,0.15);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.16);
+    --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+    --tint-w:rgba(95,185,129,0.16); --tint-m:rgba(227,166,58,0.16);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.16);
+  --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+  --tint-w:rgba(95,185,129,0.16); --tint-m:rgba(227,166,58,0.16);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 44px}
+.masthead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.mark{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.tagline{font-size:13px;color:var(--muted)}
+
+.mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.doc{border:1px solid var(--hair)}
+.doc-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 16px;border-bottom:1px solid var(--hair);flex-wrap:wrap;
+}
+.fname{font-size:12px;color:var(--muted)}
+.counts{display:flex;gap:14px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.counts b{font-weight:500;color:var(--ink)}
+.counts .w b{color:var(--wording)}
+.counts .m b{color:var(--meaning)}
+.counts .b b{color:var(--blocked)}
+.doc-body{
+  padding:24px 22px 26px;
+  font-family:Newsreader,Georgia,serif;
+  font-size:clamp(19px,3.6vw,25px);line-height:1.55;text-wrap:pretty;
+}
+.seg{border-radius:2px;padding:1px 0;transition:background-color .45s ease}
+
+.stream{margin-top:22px;display:flex;flex-direction:column;gap:12px}
+.card{
+  border:1px solid var(--hair);border-left-width:2px;
+  padding:11px 14px;
+}
+.card.wording{border-left-color:var(--wording)}
+.card.meaning{border-left-color:var(--meaning)}
+.card.done-block{border-left-color:var(--blocked)}
+.card-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.who{font-size:12px;color:var(--muted)}
+.chip{font-size:11.5px;font-weight:500;margin-left:auto;white-space:nowrap}
+.chip .sub{color:var(--muted);font-weight:400}
+.chip .nm{font-weight:400;color:var(--ink)}
+.change{font-family:Newsreader,Georgia,serif;font-size:16px;line-height:1.4;text-wrap:pretty}
+.change s{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.change ins{text-decoration:none}
+.card.wording .change ins{color:var(--wording)}
+.card.meaning .change ins{color:var(--meaning)}
+.card.done-block .change ins{color:var(--blocked)}
+
+.controls{display:flex;align-items:center;gap:14px;margin-top:26px;flex-wrap:wrap}
+.ctrl{
+  font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:1px solid var(--muted);
+  border-radius:999px;padding:5px 13px;cursor:pointer;
+}
+.ctrl:hover{color:var(--ink);border-color:var(--ink)}
+.scrub{flex:1;min-width:140px;accent-color:var(--meaning)}
+.cue{font-size:11px;color:var(--muted);min-width:6ch;text-align:right}
+
+.key{margin-top:26px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.key i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.key .kw i{background:var(--wording)}
+.key .km i{background:var(--meaning)}
+.key .kb i{background:var(--blocked)}
+
+.nav{margin-top:26px;font-size:12.5px;color:var(--muted)}
+.nav a{color:var(--muted)}
+.foot{margin-top:28px;font-size:11.5px;color:var(--muted);line-height:1.6}
+.foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <span class="mark">writ</span>
+    <span class="tagline">one sentence, edit by edit</span>
+  </div>
+
+  <div class="doc">
+    <div class="doc-head">
+      <span class="fname mono">docs/fares.md</span>
+      <span class="counts">
+        <span class="w"><b id="c-merged">0</b> merged</span>
+        <span class="m"><b id="c-waiting">0</b> waiting</span>
+        <span class="b"><b id="c-blocked">0</b> blocked</span>
+      </span>
+    </div>
+    <div class="doc-body" id="doc"></div>
+  </div>
+
+  <div class="stream" id="stream"></div>
+
+  <div class="controls">
+    <button class="ctrl" id="toggle" type="button">Pause</button>
+    <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub the animation">
+    <span class="cue" id="cue">0.0s</span>
+  </div>
+
+  <div class="key">
+    <span class="kw"><i></i>wording — merges on its own</span>
+    <span class="km"><i></i>meaning — waits for a person</span>
+    <span class="kb"><i></i>blocked — the document keeps what it said</span>
+  </div>
+
+  <p class="nav">
+    <a href="index.html">&larr; The same rule across a whole document</a><br>
+    <a href="contrast.html">&larr; What it looks like without review</a>
+  </p>
+
+  <p class="foot">
+    Visual mockup from the Rebuild 2 collection, Helsinki 2026 —
+    <a href="https://github.com/rebuild-digital/Rebuild-2-Prototypes">rebuild-digital/Rebuild-2-Prototypes</a>.
+    Not the Writ product.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var clamp = function (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; };
+  var easeOutCubic = function (u) { return 1 - Math.pow(1 - u, 3); };
+  function ramp(T, s, e) {
+    if (T <= s) return 0;
+    if (T >= e) return 1;
+    return easeOutCubic((T - s) / (e - s));
+  }
+
+  /* The sentence, as literal runs and editable segments. */
+  var DOC = [
+    { id:'sub',  base:'Children under 12' },
+    { lit:' ' },
+    { id:'verb', base:'travel free' },
+    { lit:' ' },
+    { id:'cond', base:'with a paying adult' },
+    { lit:'.' }
+  ];
+
+  /* Four edits. `merge` is when the document actually changes; a meaning edit
+     only gets one if its reviewer approves. */
+  var EDITS = [
+    { who:'agents/copyedit', seg:'verb', kind:'wording',
+      from:'travel free', to:'ride free',
+      t:1.6, classify:2.3, decide:3.1, merge:3.1 },
+
+    { who:'p.varga', seg:'cond', kind:'wording',
+      from:'with a paying adult', to:'when accompanied by a paying adult',
+      t:4.2, classify:4.9, decide:5.7, merge:5.7 },
+
+    { who:'j.okafor', seg:'cond', kind:'meaning', by:'p.varga', verdict:'block',
+      from:'when accompanied by a paying adult', to:'with an adult',
+      t:6.9, classify:8.1, decide:11.0 },
+
+    { who:'l.chen', seg:'sub', kind:'meaning', by:'n.aalto', verdict:'approve',
+      from:'Children under 12', to:'Children under 13',
+      t:12.1, classify:13.3, decide:16.1, merge:16.9 }
+  ];
+
+  var HOLD = 18.4, TOTAL = 21.0;
+
+  /* ---------- build ---------- */
+  var docEl = document.getElementById('doc');
+  var streamEl = document.getElementById('stream');
+  var segEls = {};
+
+  DOC.forEach(function (p) {
+    var s = document.createElement('span');
+    if (p.lit != null) { s.textContent = p.lit; }
+    else { s.className = 'seg'; s.textContent = p.base; segEls[p.id] = s; }
+    docEl.appendChild(s);
+  });
+
+  var cards = EDITS.map(function (E) {
+    var card = document.createElement('div');
+    card.className = 'card ' + E.kind;
+
+    var top = document.createElement('div');
+    top.className = 'card-top';
+    var who = document.createElement('span');
+    who.className = 'who mono';
+    who.textContent = E.who;
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    top.appendChild(who); top.appendChild(chip);
+
+    var change = document.createElement('div');
+    change.className = 'change';
+    var del = document.createElement('s'); del.textContent = E.from;
+    var ins = document.createElement('ins'); ins.textContent = E.to;
+    change.appendChild(del);
+    change.appendChild(document.createTextNode(' '));
+    change.appendChild(ins);
+
+    card.appendChild(top); card.appendChild(change);
+    streamEl.appendChild(card);
+    return { card:card, chip:chip, sig:null };
+  });
+
+  function setChip(c, parts) {
+    var sig = parts.map(function (p) { return p[0] + '|' + p[1]; }).join('~');
+    if (sig === c.sig) return;
+    c.sig = sig;
+    c.chip.innerHTML = '';
+    parts.forEach(function (p) {
+      var s = document.createElement('span');
+      s.textContent = p[0];
+      if (p[1] === 'sub') s.className = 'sub';
+      else if (p[1] === 'nm') s.className = 'nm mono';
+      else s.style.color = p[1];
+      c.chip.appendChild(s);
+    });
+  }
+
+  var cMerged = document.getElementById('c-merged');
+  var cWaiting = document.getElementById('c-waiting');
+  var cBlocked = document.getElementById('c-blocked');
+
+  /* ---------- render ---------- */
+  function render(T) {
+    var css = getComputedStyle(document.documentElement);
+    var WORDING = css.getPropertyValue('--wording').trim();
+    var MEANING = css.getPropertyValue('--meaning').trim();
+    var BLOCKED = css.getPropertyValue('--blocked').trim();
+
+    var merged = 0, waiting = 0, blocked = 0;
+
+    /* document text: the last merge that has landed on each segment wins */
+    var text = {}, freshness = {}, kindOf = {};
+    DOC.forEach(function (p) { if (p.id) { text[p.id] = p.base; freshness[p.id] = 0; } });
+    EDITS.forEach(function (E) {
+      if (E.merge != null && T >= E.merge) {
+        text[E.seg] = E.to;
+        freshness[E.seg] = 1 - clamp((T - E.merge) / 1.6, 0, 1);
+        kindOf[E.seg] = E.kind;
+      }
+    });
+    Object.keys(segEls).forEach(function (id) {
+      if (segEls[id].textContent !== text[id]) segEls[id].textContent = text[id];
+      var f = freshness[id];
+      segEls[id].style.backgroundColor =
+        f > 0 ? (kindOf[id] === 'meaning' ? 'var(--tint-m)' : 'var(--tint-w)') : 'transparent';
+      segEls[id].style.opacity = 1;
+    });
+
+    EDITS.forEach(function (E, i) {
+      var c = cards[i];
+      var appear = ramp(T, E.t, E.t + 0.5);
+      c.card.style.opacity = appear;
+      c.card.style.transform = 'translateY(' + ((1 - appear) * 8) + 'px)';
+      c.card.style.display = T >= E.t - 0.05 ? 'block' : 'none';
+
+      var decided = T >= E.decide;
+      var classified = T >= E.classify;
+
+      if (E.kind === 'wording') {
+        if (!classified) setChip(c, [['reading the change', 'sub']]);
+        else if (!decided) setChip(c, [['wording', WORDING], [' · same meaning', 'sub']]);
+        else { setChip(c, [['wording', WORDING], [' · merged', 'sub']]); }
+        if (decided && T >= E.t) merged++;
+      } else {
+        if (!classified) setChip(c, [['reading the change', 'sub']]);
+        else if (!decided) {
+          setChip(c, [['meaning changed', MEANING], [' · needs ', 'sub'], [E.by, 'nm']]);
+          waiting++;
+        } else if (E.verdict === 'approve') {
+          setChip(c, [['meaning changed', MEANING], [' · ', 'sub'], [E.by, 'nm'], [' approved', MEANING]]);
+          if (E.merge != null && T >= E.merge) merged++;
+        } else {
+          setChip(c, [['meaning changed', MEANING], [' · blocked by ', 'sub'], [E.by, 'nm']]);
+          blocked++;
+        }
+        c.card.className = 'card meaning' + (decided && E.verdict === 'block' ? ' done-block' : '');
+      }
+    });
+
+    cMerged.textContent = merged;
+    cWaiting.textContent = waiting;
+    cBlocked.textContent = blocked;
+  }
+
+  /* ---------- playback ---------- */
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var T = 0, playing = !reduced, last = null;
+  var toggle = document.getElementById('toggle');
+  var scrub = document.getElementById('scrub');
+  var cueEl = document.getElementById('cue');
+
+  function stamp() {
+    cueEl.textContent = T.toFixed(1) + 's';
+    scrub.value = Math.round((T / TOTAL) * 1000);
+  }
+  function frame(ts) {
+    if (last == null) last = ts;
+    var dt = (ts - last) / 1000; last = ts;
+    if (playing) { T = (T + dt) % TOTAL; render(T); stamp(); }
+    requestAnimationFrame(frame);
+  }
+
+  toggle.addEventListener('click', function () {
+    playing = !playing;
+    toggle.textContent = playing ? 'Pause' : 'Play';
+  });
+  scrub.addEventListener('input', function () {
+    playing = false; toggle.textContent = 'Play';
+    T = (scrub.value / 1000) * TOTAL;
+    render(T); stamp();
+  });
+
+  if (reduced) { T = HOLD; toggle.textContent = 'Play'; }
+  render(T); stamp();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

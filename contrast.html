@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writ — one live document, no review</title>
+<meta name="description" content="The same edits on one live document, with no branches and no review. The sentences garble.">
+<!--
+  Writ contrast piece — the same edits on one live document, no branches, no review.
+
+  This is the "before" that the merge animation answers. It is one half of a
+  pair, and the halves only work together: the cast, the three sentences and the
+  words changed are the same as the merge piece on index.html. The two are the
+  same edits told twice — here with no branches and no review, there with both.
+
+  The authored piece is a React scene on a composition stage. This is a port of
+  it to plain DOM plus one requestAnimationFrame loop, so the page is
+  self-contained and has no build step. The paragraph, every edit, every
+  authored second and the scene cues are unchanged.
+
+  The sentences are paraphrases of real philosophical positions, not quotations.
+-->
+<style>
+:root{
+  --bg:#faf9f6; --ink:#1c1b18; --muted:#77726a; --hair:rgba(28,27,24,0.18);
+  --meaning:#b8781a; --wording:#2f7d4f; --blocked:#b3362b;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.18);
+    --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.18);
+  --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 40px}
+.masthead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:26px}
+.mark{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.tagline{font-size:13px;color:var(--muted)}
+.fit{position:relative;width:100%;overflow:hidden}
+.piece{position:absolute;left:0;top:0;transform-origin:0 0}
+.frame{position:absolute;top:50%;border:1px solid var(--hair);display:flex;flex-direction:column}
+.head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex:none;border-bottom:1px solid var(--hair)}
+.fname{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+.counts{display:flex;gap:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.counts b{font-weight:500}
+.body{font-family:Newsreader,Georgia,serif;line-height:1.75;color:var(--ink);text-wrap:pretty}
+.caret{position:relative;display:inline-block;width:2px;height:1em;vertical-align:text-bottom;background:var(--ink)}
+.caret i{
+  position:absolute;left:-1px;font-style:normal;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  line-height:1.3;padding:0 5px;white-space:nowrap;color:var(--bg);background:var(--ink);
+}
+.controls{display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap}
+.ctrl{
+  font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:1px solid var(--muted);
+  border-radius:999px;padding:5px 13px;cursor:pointer;
+}
+.ctrl:hover{color:var(--ink);border-color:var(--ink)}
+.scrub{flex:1;min-width:160px;accent-color:var(--meaning)}
+.cue{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);min-width:14ch}
+.nav{margin-top:26px;font-size:12.5px;color:var(--muted)}
+.nav a{color:var(--muted)}
+.foot{margin-top:30px;font-size:11.5px;color:var(--muted);line-height:1.6;max-width:70ch}
+.foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <span class="mark">writ</span>
+    <span class="tagline">the same edits on one live document — no branches, no review</span>
+  </div>
+
+  <div class="fit" id="fit"><div class="piece" id="piece"></div></div>
+
+  <div class="controls">
+    <button class="ctrl" id="toggle" type="button">Pause</button>
+    <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub the animation">
+    <span class="cue" id="cue">0.0s</span>
+  </div>
+
+  <p class="nav">
+    <a href="index.html">&larr; The same edits with branches and review</a><br>
+    <a href="edits.html">One sentence, edit by edit &rarr;</a>
+  </p>
+
+  <p class="foot">
+    Visual mockup from the Rebuild 2 collection, Helsinki 2026 —
+    <a href="https://github.com/rebuild-digital/Rebuild-2-Prototypes">rebuild-digital/Rebuild-2-Prototypes</a>.
+    Not the Writ product. Handles and sentences are paraphrases of real philosophical
+    disagreements, not quotations.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var clamp = function (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; };
+  var Easing = {
+    easeOutCubic:   function (u) { return 1 - Math.pow(1 - u, 3); },
+    easeInOutCubic: function (u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; }
+  };
+  function animate(o) {
+    return function (T) {
+      if (T <= o.start) return o.from;
+      if (T >= o.end) return o.to;
+      var u = (T - o.start) / (o.end - o.start);
+      return o.from + (o.to - o.from) * o.ease(u);
+    };
+  }
+  var MOTION = {
+    enter: function (T, s, e) { return animate({ from:0, to:1, start:s, end:e, ease:Easing.easeOutCubic })(T); },
+    draw:  function (T, s, e) { return animate({ from:0, to:1, start:s, end:e, ease:Easing.easeInOutCubic })(T); },
+    blink: function (T) { return Math.floor(T * 2.2) % 2 === 0 ? 1 : 0.15; }
+  };
+
+  var SCENES = [
+    ['Draft', 2.5], ['Arrive', 2.5], ['Edits', 5], ['Clash', 4.5], ['Hold', 3.9], ['Reset', 1.6]
+  ];
+  var CUES = {}, TOTAL = 0;
+  SCENES.forEach(function (s) { CUES[s[0]] = TOTAL; TOTAL += s[1]; });
+
+  var LAYOUTS = {
+    band: { w:1116, h:380, inset:44, head:38, pad:'22px 34px 26px', fs:{prose:27,ui:13,mono:13} },
+    hero: { w:520,  h:470, inset:24, head:34, pad:'16px 22px 20px', fs:{prose:20,ui:12,mono:12} }
+  };
+
+  var DEL_RATE = 26, TYPE_RATE = 15;
+
+  /* The paragraph: literal runs and editable slots. Each slot's edits apply in
+     order; an edit interrupted by the next one freezes where it was, which is
+     how the text garbles. */
+  var DOC = [
+    'Reality consists of ', { id:'forms', base:'Forms', edits:[
+      { by:'@aristotle', t:5.0,  to:'the things we see' },
+      { by:'@plato',     t:7.4,  to:'Forms' },
+      { by:'@aristotle', t:9.6,  to:'the things we see' },
+      { by:'@plato',     t:10.4, del:4, to:'Forms' }
+    ] }, '. ',
+    { id:'man', base:'Man', edits:[{ by:'agents/copyedit', t:9.0, to:'Humanity' }] },
+    ' is by nature ', { id:'good', base:'good', edits:[
+      { by:'@t-hobbes',   t:6.0,  to:'at war' },
+      { by:'@j-rousseau', t:8.2,  to:'good' },
+      { by:'@t-hobbes',   t:11.2, to:'at war' },
+      { by:'@j-rousseau', t:11.9, del:2, to:'good' }
+    ] }, '. Morality comes from ',
+    { id:'god', base:'God', edits:[
+      { by:'@f-nietzsche',       t:7.0,  to:'the will to power' },
+      { by:'agents/guidelines',  t:9.8,  to:'God' },
+      { by:'@f-nietzsche',       t:12.3, to:'the will to power' },
+      { by:'agents/guidelines',  t:13.1, del:8, to:'God' }
+    ] },
+    { id:'cite', base:'', edits:[{ by:'agents/citations', t:13.8, to:' [citation needed]' }] },
+    '.', { id:'end', base:'', edits:[] }
+  ];
+  var SLOTS = DOC.filter(function (p) { return typeof p !== 'string'; });
+  var ALL_EDITS = SLOTS.reduce(function (a, s) {
+    return a.concat(s.edits.map(function (e) {
+      return { by:e.by, t:e.t, to:e.to, del:e.del, slot:s.id };
+    }));
+  }, []).sort(function (a, b) { return a.t - b.t; });
+  var editEnd = function (e, s) { return e.t + ((e.del == null ? s.length : e.del) / DEL_RATE) + e.to.length / TYPE_RATE; };
+
+  function slotAt(slot, T) {
+    var s = slot.base, typing = null;
+    for (var i = 0; i < slot.edits.length; i++) {
+      var e = slot.edits[i];
+      if (T < e.t) break;
+      var next = slot.edits[i + 1];
+      var dt = (next && T > next.t ? next.t : T) - e.t;
+      var del = Math.min(e.del == null ? s.length : e.del, s.length);
+      var delDone = del / DEL_RATE;
+      s = s.slice(0, s.length - Math.min(del, Math.floor(dt * DEL_RATE)));
+      if (dt > delDone) {
+        var n = Math.min(e.to.length, Math.floor((dt - delDone) * TYPE_RATE));
+        s += e.to.slice(0, n);
+        if (n < e.to.length && T <= (next ? next.t : Infinity)) typing = e.by;
+      } else typing = e.by;
+    }
+    return { s:s, typing:typing };
+  }
+
+  /* Where each editor's caret sits at T: at the slot of their current or next
+     edit, from 0.8s before their first edit until 1.2s after their last. */
+  function caretsAt(T) {
+    var byEditor = {};
+    ALL_EDITS.forEach(function (e) { (byEditor[e.by] = byEditor[e.by] || []).push(e); });
+    var out = {};
+    Object.keys(byEditor).forEach(function (who) {
+      var es = byEditor[who], first = es[0], last = es[es.length - 1];
+      var lastSlot = SLOTS.filter(function (s) { return s.id === last.slot; })[0];
+      var lastEnd = editEnd(last, lastSlot.base);
+      var show = MOTION.enter(T, first.t - 0.9, first.t - 0.5) * (1 - MOTION.enter(T, lastEnd + 1.0, lastEnd + 1.4));
+      if (show <= 0) return;
+      var target = first.slot;
+      es.forEach(function (e) { if (T >= e.t - 0.8) target = e.slot; });
+      (out[target] = out[target] || []).push({ who:who, op:show });
+    });
+    return out;
+  }
+
+  /* ---------- DOM ---------- */
+  var piece = document.getElementById('piece');
+  var fit = document.getElementById('fit');
+  var L = null, N = null;
+
+  function build(name) {
+    L = LAYOUTS[name];
+    piece.innerHTML = '';
+    piece.style.width = L.w + 'px';
+    piece.style.height = L.h + 'px';
+    piece.style.background = 'var(--bg)';
+
+    var frame = document.createElement('div');
+    frame.className = 'frame';
+    frame.style.left = L.inset + 'px';
+    frame.style.right = L.inset + 'px';
+    piece.appendChild(frame);
+
+    var head = document.createElement('div');
+    head.className = 'head';
+    head.style.height = L.head + 'px';
+    frame.appendChild(head);
+
+    var fname = document.createElement('div');
+    fname.className = 'fname';
+    fname.style.fontSize = L.fs.mono + 'px';
+    fname.textContent = 'docs/first-principles.md';
+    head.appendChild(fname);
+
+    var counts = document.createElement('div');
+    counts.className = 'counts';
+    counts.style.fontSize = L.fs.ui + 'px';
+    var c1 = document.createElement('span'), n1 = document.createElement('b');
+    c1.appendChild(n1); c1.appendChild(document.createTextNode(' changes'));
+    var c2 = document.createElement('span'), n2 = document.createElement('b');
+    n2.textContent = '0';
+    c2.appendChild(n2); c2.appendChild(document.createTextNode(' reviewed'));
+    counts.appendChild(c1); counts.appendChild(c2);
+    head.appendChild(counts);
+
+    var body = document.createElement('div');
+    body.className = 'body';
+    body.style.padding = L.pad;
+    body.style.fontSize = L.fs.prose + 'px';
+    frame.appendChild(body);
+
+    N = { frame:frame, body:body, n1:n1, n2:n2 };
+    resize();
+  }
+
+  function resize() {
+    if (!L) return;
+    var s = Math.min(1, fit.clientWidth / L.w);
+    piece.style.transform = 'scale(' + s + ')';
+    fit.style.height = (L.h * s) + 'px';
+  }
+
+  function render(T) {
+    var frameOp = MOTION.enter(T, 0, 0.8);
+    var textOp  = MOTION.enter(T, 0.5, 1.3);
+    var fade    = 1 - MOTION.draw(T, CUES.Reset + 0.2, CUES.Reset + 1.2);
+    var lean    = 1 + 0.03 * MOTION.draw(T, CUES.Hold, CUES.Reset);
+    var blink   = MOTION.blink(T);
+
+    var changes = ALL_EDITS.filter(function (e) { return e.t <= T; }).length;
+    var carets = caretsAt(T);
+
+    /* @plato's own caret at the end of the paragraph before anyone arrives */
+    var authorOp = MOTION.enter(T, 1.0, 1.4) * (1 - MOTION.enter(T, 6.4, 6.8));
+    if (authorOp > 0) (carets.end = carets.end || []).push({ who:'@plato', op:authorOp });
+
+    piece.style.opacity = fade;
+    N.frame.style.opacity = frameOp;
+    N.frame.style.transform = 'translateY(-50%) scale(' + lean + ')';
+    N.body.style.opacity = textOp;
+    N.n1.textContent = String(changes);
+    N.n1.style.color = 'var(--ink)';
+    N.n2.style.color = changes ? 'var(--blocked)' : 'var(--ink)';
+
+    N.body.innerHTML = '';
+    DOC.forEach(function (p) {
+      if (typeof p === 'string') { N.body.appendChild(document.createTextNode(p)); return; }
+      var st = slotAt(p, T);
+      N.body.appendChild(document.createTextNode(st.s));
+      var cs = carets[p.id] || [];
+      cs.forEach(function (cr, j) {
+        var c = document.createElement('span');
+        c.className = 'caret';
+        c.style.marginLeft = j ? '3px' : '0';
+        c.style.opacity = cr.op * (st.typing === cr.who ? 1 : blink);
+        var lab = document.createElement('i');
+        lab.textContent = cr.who;
+        lab.style.fontSize = L.fs.mono + 'px';
+        lab.style[j % 2 ? 'top' : 'bottom'] = '100%';
+        lab.style.opacity = cr.op;
+        c.appendChild(lab);
+        N.body.appendChild(c);
+      });
+    });
+  }
+
+  /* ---------- playback ---------- */
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var POSTER = CUES.Hold + 1.2;
+  var T = 0, playing = !reduced, last = null;
+  var toggle = document.getElementById('toggle');
+  var scrub = document.getElementById('scrub');
+  var cueEl = document.getElementById('cue');
+
+  function sceneName(t) {
+    var name = SCENES[0][0], acc = 0;
+    for (var i = 0; i < SCENES.length; i++) { if (t >= acc) name = SCENES[i][0]; acc += SCENES[i][1]; }
+    return name;
+  }
+  function stamp() {
+    cueEl.textContent = T.toFixed(1) + 's ' + sceneName(T);
+    scrub.value = Math.round((T / TOTAL) * 1000);
+  }
+  function frame(ts) {
+    if (last == null) last = ts;
+    var dt = (ts - last) / 1000; last = ts;
+    if (playing) { T = (T + dt) % TOTAL; render(T); stamp(); }
+    requestAnimationFrame(frame);
+  }
+
+  toggle.addEventListener('click', function () {
+    playing = !playing;
+    toggle.textContent = playing ? 'Pause' : 'Play';
+  });
+  scrub.addEventListener('input', function () {
+    playing = false; toggle.textContent = 'Play';
+    T = (scrub.value / 1000) * TOTAL;
+    render(T); stamp();
+  });
+
+  var current = null;
+  function ensure() {
+    var want = fit.clientWidth >= 760 ? 'band' : 'hero';
+    if (want !== current) { current = want; build(want); } else resize();
+    render(T); stamp();
+  }
+  window.addEventListener('resize', ensure);
+
+  ensure();
+  if (reduced) { T = POSTER; toggle.textContent = 'Play'; render(T); stamp(); }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
