@@ -36,6 +36,8 @@ Writ was one of six prototypes built in 48 hours at **Rebuild 2** in Helsinki, 3
 1 September 2026. The prototypes are collected at
 [rebuild-digital/Rebuild-2-Prototypes](https://github.com/rebuild-digital/Rebuild-2-Prototypes).
 
+Designed at Rebuild 2 by **Mikko, Tim, Ruggero and Lorenz**.
+
 `merge.html`, and the upper half of `contrast.html`, are ports of the two authored animation
 scenes. The originals are React scenes rendered on a composition stage, delivered as
 self-extracting bundles that a browser can play but a person cannot read or diff. These are ports
