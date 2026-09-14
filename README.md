@@ -23,7 +23,7 @@ That rule is the whole argument, and each page shows it from a different distanc
 | [`index.html`](index.html) | **Overview.** The product explained in words, with a static diagram of the rule and links into the other three pages. Start here. |
 | [`merge.html`](merge.html) | **Merge.** Six edits across a document. Wording flows straight through the review line; a change of meaning stops at it and waits for a named person, who approves or blocks. |
 | [`contrast.html`](contrast.html) | **Compared with a regular collaborative editor.** The same three sentences and the same five editors, twice. Above: an ordinary shared document, where edits interrupt each other mid-keystroke and the sentences garble — fourteen changes, none reviewed. Below: the same text in Writ, where each edit is a margin proposal and a change of meaning opens a thread the editors argue out before the document moves. It ends 2 merged, 1 blocked, 1 still open, and every sentence still parses. |
-| [`edits.html`](edits.html) | **Example document: policy draft.** A short fares and concessions policy taking seven edits over forty-five seconds. Each editor types their proposal into the margin a character at a time; when an edit merges, the document deletes the words it is losing and types the words it is gaining. |
+| [`edits.html`](edits.html) | **Example document: policy draft.** A real length of document — a numbered concessionary travel and refunds policy, six sections, nineteen clauses, with a version block and defined terms — taking seven edits over forty-five seconds. Each editor types their proposal into the margin against the clause reference; when an edit merges, the clause deletes the words it is losing and types the words it is gaining. |
 
 Open any of them directly. No server, no install, no build.
 
@@ -54,11 +54,13 @@ comes from. **They are paraphrases, not quotations.** Nobody said these words in
 are there because a disagreement about meaning needs to be a real disagreement to be worth
 showing, and because these ones are old enough to belong to everybody.
 
-`edits.html` avoids the question entirely: the policy and the handles are both invented. It uses
-a fares document because the stakes there are legible without any explaining. "60 minutes or
-more" and "more than 60 minutes" differ by exactly one case — a delay of precisely sixty
-minutes — and that case is somebody's refund. The edit looks like a tidy-up and is not, which is
-the argument for reading edits by meaning in one line.
+`edits.html` avoids the question entirely: the Authority, the policy and the handles are all
+invented. It uses a fares document because the stakes there are legible without any explaining.
+Clause 5.1 says "60 minutes or more". Changing it to "more than 60 minutes" removes exactly one
+case — a delay of precisely sixty minutes — and that case is somebody's refund. The edit looks
+like a tidy-up and is not, which is the argument for reading edits by meaning in one line. It
+only lands because the document around it is the kind that has consequences, which is why that
+page is a numbered policy rather than a sample sentence.
 
 ## Stack
 
