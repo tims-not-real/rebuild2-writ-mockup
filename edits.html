@@ -3,36 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Writ — one sentence, edit by edit</title>
-<meta name="description" content="One sentence, four edits. Wording merges on its own; a change of meaning stops and waits for a person.">
+<title>Writ — a policy under review</title>
+<meta name="description" content="A fares policy under review. Wording merges on its own; a change of meaning stops and waits for a named person.">
 <!--
-  One sentence, edit by edit — built from scratch for this repo.
+  A policy under review — built from scratch for this repo.
 
-  The two animations beside it argue the case at the level of a whole document.
-  This one slows down to a single sentence and shows the rule working edit by
-  edit: wording merges on its own, and a change of meaning stops and waits for
-  a named person, who can approve it or block it.
+  The merge band argues the case with geometry. This page argues it with a
+  document you can actually read: a short fares and concessions policy, seven
+  edits landing on it over forty seconds, each one classified and resolved in
+  the margin beside the line it touches.
 
-  The sentence is the fare rule from the Rebuild 2 hackathon explainer. The
-  handles are invented.
+  The point of using a fares policy is that the stakes are legible. "60 minutes
+  or more" and "more than 60 minutes" differ by one case — a delay of exactly
+  sixty minutes — and that case is somebody's refund. It looks like a tidy-up
+  and it is not, which is the whole argument for reading edits by meaning.
+
+  The policy is invented. So are the handles.
 -->
 <style>
 :root{
   --bg:#faf9f6; --ink:#1c1b18; --muted:#77726a; --hair:rgba(28,27,24,0.16);
   --meaning:#b8781a; --wording:#2f7d4f; --blocked:#b3362b;
-  --tint-w:rgba(47,125,79,0.13); --tint-m:rgba(184,120,26,0.15);
+  --tint-w:rgba(47,125,79,0.14); --tint-m:rgba(184,120,26,0.16); --tint-b:rgba(179,54,43,0.14);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.16);
     --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
-    --tint-w:rgba(95,185,129,0.16); --tint-m:rgba(227,166,58,0.16);
+    --tint-w:rgba(95,185,129,0.17); --tint-m:rgba(227,166,58,0.17); --tint-b:rgba(226,107,95,0.17);
   }
 }
 :root[data-theme="dark"]{
   --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.16);
   --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
-  --tint-w:rgba(95,185,129,0.16); --tint-m:rgba(227,166,58,0.16);
+  --tint-w:rgba(95,185,129,0.17); --tint-m:rgba(227,166,58,0.17); --tint-b:rgba(226,107,95,0.17);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -41,11 +45,10 @@ body{
   font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
   -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:760px;margin:0 auto;padding:32px 20px 44px}
+.wrap{max-width:1060px;margin:0 auto;padding:32px 20px 44px}
 .masthead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:24px}
 .mark{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .tagline{font-size:13px;color:var(--muted)}
-
 .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
 
 .doc{border:1px solid var(--hair)}
@@ -54,39 +57,45 @@ body{
   padding:9px 16px;border-bottom:1px solid var(--hair);flex-wrap:wrap;
 }
 .fname{font-size:12px;color:var(--muted)}
-.counts{display:flex;gap:14px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.counts b{font-weight:500;color:var(--ink)}
+.counts{display:flex;gap:15px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.counts b{font-weight:500}
 .counts .w b{color:var(--wording)}
 .counts .m b{color:var(--meaning)}
 .counts .b b{color:var(--blocked)}
-.doc-body{
-  padding:24px 22px 26px;
-  font-family:Newsreader,Georgia,serif;
-  font-size:clamp(19px,3.6vw,25px);line-height:1.55;text-wrap:pretty;
-}
-.seg{border-radius:2px;padding:1px 0;transition:background-color .45s ease}
 
-.stream{margin-top:22px;display:flex;flex-direction:column;gap:12px}
-.card{
-  border:1px solid var(--hair);border-left-width:2px;
-  padding:11px 14px;
-}
-.card.wording{border-left-color:var(--wording)}
-.card.meaning{border-left-color:var(--meaning)}
-.card.done-block{border-left-color:var(--blocked)}
-.card-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:7px}
-.who{font-size:12px;color:var(--muted)}
-.chip{font-size:11.5px;font-weight:500;margin-left:auto;white-space:nowrap}
-.chip .sub{color:var(--muted);font-weight:400}
-.chip .nm{font-weight:400;color:var(--ink)}
-.change{font-family:Newsreader,Georgia,serif;font-size:16px;line-height:1.4;text-wrap:pretty}
-.change s{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
-.change ins{text-decoration:none}
-.card.wording .change ins{color:var(--wording)}
-.card.meaning .change ins{color:var(--meaning)}
-.card.done-block .change ins{color:var(--blocked)}
+.sheet{display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:30px;padding:26px 26px 30px}
+.text{font-family:Newsreader,Georgia,serif;font-size:17px;line-height:1.72;text-wrap:pretty}
+.margin{position:relative}
 
-.controls{display:flex;align-items:center;gap:14px;margin-top:26px;flex-wrap:wrap}
+.sec{margin:0 0 20px;transition:opacity .55s ease}
+.sec:last-child{margin-bottom:0}
+.sec h2{
+  margin:0 0 6px;font-family:Inter,system-ui,sans-serif;
+  font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+}
+.sec p{margin:0}
+.slot{border-radius:2px;transition:background-color .5s ease,box-shadow .5s ease}
+.slot.pending{box-shadow:inset 0 -1px 0 0 var(--meaning)}
+
+.note{
+  border-left:2px solid var(--hair);padding:0 0 0 11px;
+  transition:opacity .4s ease;
+}
+.note.wording{border-left-color:var(--wording)}
+.note.meaning{border-left-color:var(--meaning)}
+.note.blocked{border-left-color:var(--blocked)}
+.note .who{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.note .chg{font-family:Newsreader,Georgia,serif;font-size:13.5px;line-height:1.45;text-wrap:pretty}
+.note .chg s{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.note .chg ins{text-decoration:none}
+.note.wording .chg ins{color:var(--wording)}
+.note.meaning .chg ins{color:var(--meaning)}
+.note.blocked .chg ins{color:var(--blocked)}
+.note .chip{display:block;margin-top:4px;font-size:11px;font-weight:500;line-height:1.35}
+.note .chip .sub{color:var(--muted);font-weight:400}
+.note .chip .nm{color:var(--ink);font-weight:400}
+
+.controls{display:flex;align-items:center;gap:14px;margin-top:24px;flex-wrap:wrap}
 .ctrl{
   font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--muted);background:transparent;border:1px solid var(--muted);
@@ -96,7 +105,7 @@ body{
 .scrub{flex:1;min-width:140px;accent-color:var(--meaning)}
 .cue{font-size:11px;color:var(--muted);min-width:6ch;text-align:right}
 
-.key{margin-top:26px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.key{margin-top:24px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
 .key i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .key .kw i{background:var(--wording)}
 .key .km i{background:var(--meaning)}
@@ -104,8 +113,18 @@ body{
 
 .nav{margin-top:26px;font-size:12.5px;color:var(--muted)}
 .nav a{color:var(--muted)}
-.foot{margin-top:28px;font-size:11.5px;color:var(--muted);line-height:1.6}
+.foot{margin-top:28px;font-size:11.5px;color:var(--muted);line-height:1.6;max-width:72ch}
 .foot a{color:var(--muted)}
+
+@media (max-width:900px){
+  .sheet{grid-template-columns:minmax(0,1fr);gap:0;padding:20px 18px 24px}
+  .margin{display:none}
+  .inline-notes{display:flex;flex-direction:column;gap:12px;margin:12px 0 0}
+  .sec{margin-bottom:24px}
+}
+@media (min-width:901px){
+  .inline-notes{display:none}
+}
 </style>
 </head>
 <body>
@@ -113,7 +132,7 @@ body{
 
   <div class="masthead">
     <span class="mark">writ</span>
-    <span class="tagline">one sentence, edit by edit</span>
+    <span class="tagline">a policy under review — wording merges, meaning waits for a person</span>
   </div>
 
   <div class="doc">
@@ -125,10 +144,11 @@ body{
         <span class="b"><b id="c-blocked">0</b> blocked</span>
       </span>
     </div>
-    <div class="doc-body" id="doc"></div>
+    <div class="sheet">
+      <div class="text" id="text"></div>
+      <div class="margin" id="margin"></div>
+    </div>
   </div>
-
-  <div class="stream" id="stream"></div>
 
   <div class="controls">
     <button class="ctrl" id="toggle" type="button">Pause</button>
@@ -138,19 +158,19 @@ body{
 
   <div class="key">
     <span class="kw"><i></i>wording — merges on its own</span>
-    <span class="km"><i></i>meaning — waits for a person</span>
+    <span class="km"><i></i>meaning — waits for a named person</span>
     <span class="kb"><i></i>blocked — the document keeps what it said</span>
   </div>
 
   <p class="nav">
-    <a href="index.html">&larr; The same rule across a whole document</a><br>
+    <a href="index.html">&larr; The same rule as geometry</a><br>
     <a href="contrast.html">&larr; What it looks like without review</a>
   </p>
 
   <p class="foot">
     Visual mockup from the Rebuild 2 collection, Helsinki 2026 —
     <a href="https://github.com/rebuild-digital/Rebuild-2-Prototypes">rebuild-digital/Rebuild-2-Prototypes</a>.
-    Not the Writ product.
+    Not the Writ product. The policy and the handles are invented.
   </p>
 
 </div>
@@ -167,94 +187,184 @@ body{
     return easeOutCubic((T - s) / (e - s));
   }
 
-  /* The sentence, as literal runs and editable segments. */
+  /* ---------- the document ---------- */
   var DOC = [
-    { id:'sub',  base:'Children under 12' },
-    { lit:' ' },
-    { id:'verb', base:'travel free' },
-    { lit:' ' },
-    { id:'cond', base:'with a paying adult' },
-    { lit:'.' }
+    { h:'Concessions', p:[
+      'Children ', { id:'age', base:'under 12' }, ' ', { id:'free', base:'travel free' },
+      ' when accompanied by a paying adult. Proof of age is not required at the gate, but staff ',
+      'may ask for it on board. A child travelling alone needs a concessionary ticket, which is ',
+      { id:'half', base:'half the standard fare' },
+      '. Two children may travel free with each paying adult; a third child pays the ',
+      'concessionary fare.'
+    ] },
+    { h:'Evidence', p:[
+      'Concessionary fares for students, jobseekers and ',
+      { id:'over65', base:'passengers over 65' },
+      ' require a valid card issued by the operator. The card is checked at the gate. Where the ',
+      'gate is unstaffed, a photograph of the card ', { id:'photo', base:'is accepted' },
+      '. Staff may refuse a card that has expired, but may not refuse one that is merely damaged.'
+    ] },
+    { h:'Refunds', p:[
+      'A delay of ', { id:'delay', base:'60 minutes or more' },
+      ' entitles the passenger to a full refund. Delays are measured against the published ',
+      'timetable, not against a revised timetable issued on the day of travel. Refunds are paid ',
+      'to the card used for the booking, ', { id:'paid', base:'within fourteen days of the claim' },
+      '. A claim must be made within one month of the journey.'
+    ] },
+    { h:'Appeals', p:[
+      'A passenger may appeal a refused refund once. Appeals are ',
+      { id:'person', base:'decided by a person, not by an automated system' },
+      '. The operator must give reasons in writing. The decision of the appeal is final, and no ',
+      'further internal review is available.'
+    ] }
   ];
 
-  /* Four edits. `merge` is when the document actually changes; a meaning edit
-     only gets one if its reviewer approves. */
+  /* ---------- the edits ----------
+     `merge` is when the document actually changes. A meaning edit only gets one
+     if its reviewer approves; a blocked one never does, and the document keeps
+     what it said. l.chen's is still waiting when the loop holds, which is the
+     honest end state for a document this size. */
   var EDITS = [
-    { who:'agents/copyedit', seg:'verb', kind:'wording',
+    { who:'agents/copyedit', seg:'free', kind:'wording',
       from:'travel free', to:'ride free',
-      t:1.6, classify:2.3, decide:3.1, merge:3.1 },
+      t:2.0, classify:2.6, decide:4.0, merge:4.0 },
 
-    { who:'p.varga', seg:'cond', kind:'wording',
-      from:'with a paying adult', to:'when accompanied by a paying adult',
-      t:4.2, classify:4.9, decide:5.7, merge:5.7 },
+    { who:'p.varga', seg:'over65', kind:'wording',
+      from:'passengers over 65', to:'passengers aged 65 and over',
+      t:6.0, classify:6.6, decide:8.0, merge:8.0 },
 
-    { who:'j.okafor', seg:'cond', kind:'meaning', by:'p.varga', verdict:'block',
-      from:'when accompanied by a paying adult', to:'with an adult',
-      t:6.9, classify:8.1, decide:11.0 },
+    { who:'j.okafor', seg:'age', kind:'meaning', by:'n.aalto', verdict:'approve',
+      from:'under 12', to:'under 13',
+      t:10.5, classify:11.7, decide:17.0, merge:17.8 },
 
-    { who:'l.chen', seg:'sub', kind:'meaning', by:'n.aalto', verdict:'approve',
-      from:'Children under 12', to:'Children under 13',
-      t:12.1, classify:13.3, decide:16.1, merge:16.9 }
+    { who:'t.brandt', seg:'delay', kind:'meaning', by:'p.varga', verdict:'block',
+      from:'60 minutes or more', to:'more than 60 minutes',
+      t:14.0, classify:15.2, decide:22.0 },
+
+    { who:'agents/line-edit', seg:'paid', kind:'wording',
+      from:'within fourteen days of the claim', to:'within 14 days of the claim',
+      t:19.0, classify:19.6, decide:21.0, merge:21.0 },
+
+    { who:'l.chen', seg:'person', kind:'meaning', by:'n.aalto', verdict:null,
+      from:'decided by a person, not by an automated system', to:'decided by a person',
+      t:25.0, classify:26.2, decide:null },
+
+    { who:'agents/citations', seg:'photo', kind:'wording',
+      from:'is accepted', to:'is accepted under §4.2',
+      t:29.0, classify:29.6, decide:31.0, merge:31.0 }
   ];
 
-  var HOLD = 18.4, TOTAL = 21.0;
+  var HOLD = 33.0, TOTAL = 40.0;
 
   /* ---------- build ---------- */
-  var docEl = document.getElementById('doc');
-  var streamEl = document.getElementById('stream');
-  var segEls = {};
+  var textEl = document.getElementById('text');
+  var marginEl = document.getElementById('margin');
+  var slotEls = {}, secEls = [], inlineSlots = [];
 
-  DOC.forEach(function (p) {
-    var s = document.createElement('span');
-    if (p.lit != null) { s.textContent = p.lit; }
-    else { s.className = 'seg'; s.textContent = p.base; segEls[p.id] = s; }
-    docEl.appendChild(s);
+  DOC.forEach(function (S, si) {
+    var sec = document.createElement('section');
+    sec.className = 'sec';
+    var h = document.createElement('h2');
+    h.textContent = S.h;
+    var p = document.createElement('p');
+    S.p.forEach(function (part) {
+      if (typeof part === 'string') { p.appendChild(document.createTextNode(part)); return; }
+      var s = document.createElement('span');
+      s.className = 'slot';
+      s.textContent = part.base;
+      slotEls[part.id] = s;
+      p.appendChild(s);
+    });
+    var inl = document.createElement('div');
+    inl.className = 'inline-notes';
+    sec.appendChild(h); sec.appendChild(p); sec.appendChild(inl);
+    textEl.appendChild(sec);
+    secEls.push(sec);
+    inlineSlots.push(inl);
   });
 
-  var cards = EDITS.map(function (E) {
-    var card = document.createElement('div');
-    card.className = 'card ' + E.kind;
+  var secOf = {};
+  DOC.forEach(function (S, si) {
+    S.p.forEach(function (part) { if (typeof part !== 'string') secOf[part.id] = si; });
+  });
 
-    var top = document.createElement('div');
-    top.className = 'card-top';
+  var notes = EDITS.map(function (E) {
+    var n = document.createElement('div');
+    n.className = 'note ' + E.kind;
     var who = document.createElement('span');
-    who.className = 'who mono';
-    who.textContent = E.who;
-    var chip = document.createElement('span');
-    chip.className = 'chip';
-    top.appendChild(who); top.appendChild(chip);
-
-    var change = document.createElement('div');
-    change.className = 'change';
+    who.className = 'who mono'; who.textContent = E.who;
+    var chg = document.createElement('div');
+    chg.className = 'chg';
     var del = document.createElement('s'); del.textContent = E.from;
     var ins = document.createElement('ins'); ins.textContent = E.to;
-    change.appendChild(del);
-    change.appendChild(document.createTextNode(' '));
-    change.appendChild(ins);
-
-    card.appendChild(top); card.appendChild(change);
-    streamEl.appendChild(card);
-    return { card:card, chip:chip, sig:null };
+    chg.appendChild(del); chg.appendChild(document.createTextNode(' ')); chg.appendChild(ins);
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    n.appendChild(who); n.appendChild(chg); n.appendChild(chip);
+    marginEl.appendChild(n);
+    return { el:n, chip:chip, sig:null, h:0 };
   });
 
-  function setChip(c, parts) {
+  function setChip(n, parts) {
     var sig = parts.map(function (p) { return p[0] + '|' + p[1]; }).join('~');
-    if (sig === c.sig) return;
-    c.sig = sig;
-    c.chip.innerHTML = '';
+    if (sig === n.sig) return false;
+    n.sig = sig;
+    n.chip.innerHTML = '';
     parts.forEach(function (p) {
       var s = document.createElement('span');
       s.textContent = p[0];
       if (p[1] === 'sub') s.className = 'sub';
       else if (p[1] === 'nm') s.className = 'nm mono';
       else s.style.color = p[1];
-      c.chip.appendChild(s);
+      n.chip.appendChild(s);
     });
+    return true;
   }
 
   var cMerged = document.getElementById('c-merged');
   var cWaiting = document.getElementById('c-waiting');
   var cBlocked = document.getElementById('c-blocked');
+
+  /* ---------- placement ---------- */
+  var wide = null, dirty = true;
+
+  function place() {
+    var nowWide = window.innerWidth > 900;
+    if (nowWide !== wide) {
+      wide = nowWide;
+      notes.forEach(function (n, i) {
+        if (wide) { n.el.style.position = 'absolute'; marginEl.appendChild(n.el); }
+        else { n.el.style.position = 'static'; n.el.style.top = ''; inlineSlots[secOf[EDITS[i].seg]].appendChild(n.el); }
+      });
+      dirty = true;
+    }
+  }
+
+  function measure() {
+    if (!wide) return;
+    notes.forEach(function (n) { n.h = n.el.offsetHeight; });
+    dirty = false;
+  }
+
+  /* stack visible notes against the line they annotate, pushing down on collision */
+  function layoutMargin(vis) {
+    if (!wide) return;
+    if (dirty) measure();
+    var top0 = textEl.getBoundingClientRect().top;
+    var rows = [];
+    EDITS.forEach(function (E, i) {
+      if (vis[i] <= 0.01) return;
+      var el = slotEls[E.seg];
+      rows.push({ i:i, want: el.getBoundingClientRect().top - top0 });
+    });
+    rows.sort(function (a, b) { return a.want - b.want; });
+    var prev = -1e9;
+    rows.forEach(function (r) {
+      var top = Math.max(r.want, prev);
+      notes[r.i].el.style.top = top + 'px';
+      prev = top + notes[r.i].h + 14;
+    });
+  }
 
   /* ---------- render ---------- */
   function render(T) {
@@ -264,59 +374,82 @@ body{
     var BLOCKED = css.getPropertyValue('--blocked').trim();
 
     var merged = 0, waiting = 0, blocked = 0;
+    var text = {}, tint = {}, pending = {};
+    Object.keys(slotEls).forEach(function (id) { tint[id] = null; pending[id] = false; });
+    DOC.forEach(function (S) {
+      S.p.forEach(function (part) { if (typeof part !== 'string') text[part.id] = part.base; });
+    });
 
-    /* document text: the last merge that has landed on each segment wins */
-    var text = {}, freshness = {}, kindOf = {};
-    DOC.forEach(function (p) { if (p.id) { text[p.id] = p.base; freshness[p.id] = 0; } });
-    EDITS.forEach(function (E) {
-      if (E.merge != null && T >= E.merge) {
-        text[E.seg] = E.to;
-        freshness[E.seg] = 1 - clamp((T - E.merge) / 1.6, 0, 1);
-        kindOf[E.seg] = E.kind;
-      }
-    });
-    Object.keys(segEls).forEach(function (id) {
-      if (segEls[id].textContent !== text[id]) segEls[id].textContent = text[id];
-      var f = freshness[id];
-      segEls[id].style.backgroundColor =
-        f > 0 ? (kindOf[id] === 'meaning' ? 'var(--tint-m)' : 'var(--tint-w)') : 'transparent';
-      segEls[id].style.opacity = 1;
-    });
+    var vis = [], focus = [], chipChanged = false;
 
     EDITS.forEach(function (E, i) {
-      var c = cards[i];
-      var appear = ramp(T, E.t, E.t + 0.5);
-      c.card.style.opacity = appear;
-      c.card.style.transform = 'translateY(' + ((1 - appear) * 8) + 'px)';
-      c.card.style.display = T >= E.t - 0.05 ? 'block' : 'none';
+      var appear = ramp(T, E.t, E.t + 0.6);
+      vis[i] = appear;
 
-      var decided = T >= E.decide;
       var classified = T >= E.classify;
+      var decided = E.decide != null && T >= E.decide;
+      var mergedNow = E.merge != null && T >= E.merge;
 
-      if (E.kind === 'wording') {
-        if (!classified) setChip(c, [['reading the change', 'sub']]);
-        else if (!decided) setChip(c, [['wording', WORDING], [' · same meaning', 'sub']]);
-        else { setChip(c, [['wording', WORDING], [' · merged', 'sub']]); }
-        if (decided && T >= E.t) merged++;
+      /* focus window: from arrival until a beat after it resolves */
+      var until = (E.decide != null ? E.decide : E.classify + 2.5) + 1.6;
+      focus[i] = ramp(T, E.t, E.t + 0.5) * (1 - ramp(T, until, until + 0.8));
+
+      var cls = 'note ' + E.kind, parts;
+      if (!classified) {
+        parts = [['reading the change', 'sub']];
+      } else if (E.kind === 'wording') {
+        parts = decided ? [['wording', WORDING], [' · merged', 'sub']]
+                        : [['wording', WORDING], [' · same meaning', 'sub']];
+      } else if (!decided) {
+        parts = [['meaning changed', MEANING], [' · needs ', 'sub'], [E.by, 'nm']];
+      } else if (E.verdict === 'approve') {
+        parts = [['meaning changed', MEANING], [' · ', 'sub'], [E.by, 'nm'], [' approved', MEANING]];
       } else {
-        if (!classified) setChip(c, [['reading the change', 'sub']]);
-        else if (!decided) {
-          setChip(c, [['meaning changed', MEANING], [' · needs ', 'sub'], [E.by, 'nm']]);
-          waiting++;
-        } else if (E.verdict === 'approve') {
-          setChip(c, [['meaning changed', MEANING], [' · ', 'sub'], [E.by, 'nm'], [' approved', MEANING]]);
-          if (E.merge != null && T >= E.merge) merged++;
-        } else {
-          setChip(c, [['meaning changed', MEANING], [' · blocked by ', 'sub'], [E.by, 'nm']]);
-          blocked++;
-        }
-        c.card.className = 'card meaning' + (decided && E.verdict === 'block' ? ' done-block' : '');
+        parts = [['meaning changed', MEANING], [' · blocked by ', 'sub'], [E.by, 'nm']];
+        cls = 'note blocked';
       }
+      if (setChip(notes[i], parts)) chipChanged = true;
+      if (notes[i].el.className !== cls) { notes[i].el.className = cls; chipChanged = true; }
+      notes[i].el.style.opacity = appear;
+
+      /* what the document says, and how the span is marked */
+      if (mergedNow) {
+        text[E.seg] = E.to;
+        var fresh = 1 - clamp((T - E.merge) / 1.8, 0, 1);
+        if (fresh > 0) tint[E.seg] = E.kind === 'meaning' ? 'var(--tint-m)' : 'var(--tint-w)';
+        merged++;
+      } else if (classified && E.kind === 'meaning' && !decided) {
+        pending[E.seg] = true;
+        tint[E.seg] = 'var(--tint-m)';
+        waiting++;
+      } else if (decided && E.verdict === 'block') {
+        var f2 = 1 - clamp((T - E.decide) / 2.0, 0, 1);
+        if (f2 > 0) tint[E.seg] = 'var(--tint-b)';
+        blocked++;
+      }
+    });
+
+    Object.keys(slotEls).forEach(function (id) {
+      var el = slotEls[id];
+      if (el.textContent !== text[id]) { el.textContent = text[id]; chipChanged = true; }
+      el.style.backgroundColor = tint[id] || 'transparent';
+      el.className = 'slot' + (pending[id] ? ' pending' : '');
+    });
+
+    /* the view follows the active edit: its section stays lit, the rest recede */
+    var best = -1, bestT = -1;
+    focus.forEach(function (f, i) { if (f > 0.15 && EDITS[i].t > bestT) { bestT = EDITS[i].t; best = i; } });
+    var activeSec = best >= 0 ? secOf[EDITS[best].seg] : -1;
+    secEls.forEach(function (s, i) {
+      s.style.opacity = (activeSec < 0 || i === activeSec) ? 1 : 0.42;
     });
 
     cMerged.textContent = merged;
     cWaiting.textContent = waiting;
     cBlocked.textContent = blocked;
+
+    if (chipChanged) dirty = true;
+    layoutMargin(vis);
   }
 
   /* ---------- playback ---------- */
@@ -346,7 +479,9 @@ body{
     T = (scrub.value / 1000) * TOTAL;
     render(T); stamp();
   });
+  window.addEventListener('resize', function () { place(); dirty = true; render(T); });
 
+  place();
   if (reduced) { T = HOLD; toggle.textContent = 'Play'; }
   render(T); stamp();
   requestAnimationFrame(frame);

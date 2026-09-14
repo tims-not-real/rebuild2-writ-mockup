@@ -20,7 +20,7 @@ That rule is the whole argument, and each page here shows it from a different di
 |---|---|
 | [`index.html`](index.html) | **The merge band.** Six edits across a document. Wording flows straight through review; a change of meaning stops at the review line and waits for a named person, who approves it or blocks it. |
 | [`contrast.html`](contrast.html) | **The same edits with no branches and no review.** Everyone types into one live document at once. Edits interrupt each other mid-keystroke and the sentences garble: fourteen changes, none reviewed. |
-| [`edits.html`](edits.html) | **One sentence, edit by edit.** The rule slowed right down — four edits on a single fare rule, each classified and resolved in turn, with the document updating only when something actually merges. |
+| [`edits.html`](edits.html) | **A policy under review.** A short fares and concessions policy with seven edits landing on it over forty seconds. Each one is classified and resolved in the margin beside the line it touches, and the document changes only when something actually merges. |
 | [`explainer.html`](explainer.html) | **The hackathon explainer.** The two-scene animation Writ showed at Rebuild 2, rebuilt from the gif in the prototypes collection. |
 
 Open any of them directly. No server, no install, no build.
@@ -48,7 +48,11 @@ comes from. **They are paraphrases, not quotations.** Nobody said these words in
 are there because a disagreement about meaning needs to be a real disagreement to be worth
 showing, and because these ones are old enough to belong to everybody.
 
-`edits.html` uses the fare rule from the hackathon explainer instead, with invented handles.
+`edits.html` avoids the question entirely: the policy and the handles are both invented. It
+uses a fares document because the stakes there are legible without any explaining. "60 minutes
+or more" and "more than 60 minutes" differ by exactly one case — a delay of precisely sixty
+minutes — and that case is somebody's refund. The edit looks like a tidy-up and is not, which is
+the argument for reading edits by meaning in one line.
 
 ## Stack
 
