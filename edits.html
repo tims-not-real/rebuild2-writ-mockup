@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Writ — a policy under review</title>
+<title>Writ — example document: policy draft</title>
 <meta name="description" content="A fares policy under review. Wording merges on its own; a change of meaning stops and waits for a named person.">
 <!--
   A policy under review — built from scratch for this repo.
@@ -157,7 +157,8 @@ body{
 .tabs a[aria-current="page"]{color:var(--ink);background:var(--chip)}
 .theme{font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
 .theme:hover{color:var(--ink);border-color:var(--muted)}
-.pagesub{margin:0 0 24px;font-size:13.5px;color:var(--muted);line-height:1.5}
+h1{margin:0 0 7px;font-size:clamp(21px,3.4vw,28px);font-weight:600;letter-spacing:-.022em;line-height:1.15}
+.pagesub{margin:0 0 26px;font-size:13.5px;color:var(--muted);line-height:1.55;max-width:66ch}
 .morelinks{margin-top:26px;display:flex;gap:10px;flex-wrap:wrap}
 .morelinks a{font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:6px 13px;transition:color .2s,border-color .2s,background-color .2s}
 .morelinks a:hover{color:var(--ink);border-color:var(--muted);background:var(--panel)}
@@ -172,13 +173,15 @@ body{
     <span class="tabs">
       <a href="index.html">Overview</a>
       <a href="merge.html">Merge</a>
-      <a href="contrast.html">Without review</a>
-      <a href="edits.html" aria-current="page">Policy</a>
+      <a href="contrast.html">Comparison</a>
+      <a href="edits.html" aria-current="page">Example document</a>
     </span>
     <button class="theme" id="theme" type="button">Dark</button>
   </nav>
 
-  <p class="pagesub">A fares policy taking seven edits. Wording merges on its own; meaning waits for a named person.</p>
+  <h1>Example document: policy draft</h1>
+  <p class="pagesub">A fares and concessions policy taking seven edits over forty-five seconds.
+  Wording merges on its own; a change of meaning stops and waits for a named person.</p>
 
   <div class="doc">
     <div class="doc-head">
@@ -210,7 +213,7 @@ body{
   <div class="morelinks">
     <a href="index.html">← Overview</a>
     <a href="merge.html">The same rule as geometry</a>
-    <a href="contrast.html">What it looks like without review</a>
+    <a href="contrast.html">Compared with a regular editor</a>
   </div>
 
   <p class="foot">

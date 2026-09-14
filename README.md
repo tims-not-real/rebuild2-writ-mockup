@@ -20,10 +20,10 @@ That rule is the whole argument, and each page shows it from a different distanc
 
 | | |
 |---|---|
-| [`index.html`](index.html) | **Overview.** The product explained in words, with a static diagram of the rule and links into the three animations. Start here. |
+| [`index.html`](index.html) | **Overview.** The product explained in words, with a static diagram of the rule and links into the other three pages. Start here. |
 | [`merge.html`](merge.html) | **Merge.** Six edits across a document. Wording flows straight through the review line; a change of meaning stops at it and waits for a named person, who approves or blocks. |
-| [`contrast.html`](contrast.html) | **Without review.** The same edits with no branches. Everyone types into one live document at once, edits interrupt each other mid-keystroke, and the sentences garble: fourteen changes, none reviewed. |
-| [`edits.html`](edits.html) | **A policy under review.** A short fares and concessions policy taking seven edits over forty-five seconds. Each editor types their proposal into the margin a character at a time; when an edit merges, the document deletes the words it is losing and types the words it is gaining. |
+| [`contrast.html`](contrast.html) | **Compared with a regular collaborative editor.** The same edits told twice, stacked. Above: an ordinary shared document, where edits interrupt each other mid-keystroke and the sentences garble — fourteen changes, none reviewed. Below: the same edits in Writ, branched and reviewed. |
+| [`edits.html`](edits.html) | **Example document: policy draft.** A short fares and concessions policy taking seven edits over forty-five seconds. Each editor types their proposal into the margin a character at a time; when an edit merges, the document deletes the words it is losing and types the words it is gaining. |
 
 Open any of them directly. No server, no install, no build.
 
