@@ -10,8 +10,16 @@
 
   The merge band argues the case with geometry. This page argues it with a
   document you can actually read: a short fares and concessions policy, seven
-  edits landing on it over forty seconds, each one classified and resolved in
-  the margin beside the line it touches.
+  edits landing on it over forty-five seconds, each one classified and resolved
+  in the margin beside the line it touches.
+
+  Nothing here cuts. Each editor types their proposal into the margin a
+  character at a time, and when an edit merges the document deletes the words it
+  is losing and types the words it is gaining. Deletion runs faster than typing,
+  which is how real editing feels. Only the span that actually changed is
+  retyped: the common prefix and suffix stay put, so "within fourteen days of
+  the claim" becoming "within 14 days of the claim" deletes eight characters and
+  types two, rather than rewriting the clause.
 
   The point of using a fares policy is that the stakes are legible. "60 minutes
   or more" and "more than 60 minutes" differ by one case — a delay of exactly
@@ -77,6 +85,14 @@ body{
 .slot{border-radius:2px;transition:background-color .5s ease,box-shadow .5s ease}
 .slot.pending{box-shadow:inset 0 -1px 0 0 var(--meaning)}
 
+.cur{
+  display:none;width:1.5px;height:1em;vertical-align:text-bottom;
+  background:var(--ink);margin:0 0 0 1px;
+}
+.cur.on{display:inline-block}
+.slot.typing .cur{background:var(--wording)}
+.slot.deleting .cur{background:var(--blocked)}
+
 .note{
   border-left:2px solid var(--hair);padding:0 0 0 11px;
   transition:opacity .4s ease;
@@ -91,6 +107,9 @@ body{
 .note.wording .chg ins{color:var(--wording)}
 .note.meaning .chg ins{color:var(--meaning)}
 .note.blocked .chg ins{color:var(--blocked)}
+.note .cur{height:.92em;background:var(--meaning)}
+.note.wording .cur{background:var(--wording)}
+.note.blocked .cur{background:var(--blocked)}
 .note .chip{display:block;margin-top:4px;font-size:11px;font-weight:500;line-height:1.35}
 .note .chip .sub{color:var(--muted);font-weight:400}
 .note .chip .nm{color:var(--ink);font-weight:400}
@@ -187,6 +206,10 @@ body{
     return easeOutCubic((T - s) / (e - s));
   }
 
+  /* Deletion runs faster than typing, the way it does for a person: you select
+     and remove in one movement, then compose the replacement. */
+  var DEL_RATE = 26, TYPE_RATE = 15;
+
   /* ---------- the document ---------- */
   var DOC = [
     { h:'Concessions', p:[
@@ -220,72 +243,97 @@ body{
   ];
 
   /* ---------- the edits ----------
-     `merge` is when the document actually changes. A meaning edit only gets one
-     if its reviewer approves; a blocked one never does, and the document keeps
-     what it said. l.chen's is still waiting when the loop holds, which is the
-     honest end state for a document this size. */
+     t       the note appears and the editor starts typing the proposal
+     classify  the chip stops saying "reading the change" and names the kind
+     decide  the verdict lands (wording decides itself; meaning waits for `by`)
+     merge   the document starts deleting and retyping. A blocked edit never
+             gets one, and a waiting edit has not earned one yet. */
   var EDITS = [
     { who:'agents/copyedit', seg:'free', kind:'wording',
       from:'travel free', to:'ride free',
-      t:2.0, classify:2.6, decide:4.0, merge:4.0 },
+      t:2.0, classify:3.0, decide:4.2, merge:4.5 },
 
     { who:'p.varga', seg:'over65', kind:'wording',
       from:'passengers over 65', to:'passengers aged 65 and over',
-      t:6.0, classify:6.6, decide:8.0, merge:8.0 },
+      t:6.5, classify:8.7, decide:9.9, merge:10.2 },
 
     { who:'j.okafor', seg:'age', kind:'meaning', by:'n.aalto', verdict:'approve',
       from:'under 12', to:'under 13',
-      t:10.5, classify:11.7, decide:17.0, merge:17.8 },
+      t:12.5, classify:13.4, decide:18.6, merge:19.0 },
 
     { who:'t.brandt', seg:'delay', kind:'meaning', by:'p.varga', verdict:'block',
       from:'60 minutes or more', to:'more than 60 minutes',
-      t:14.0, classify:15.2, decide:22.0 },
+      t:15.5, classify:17.2, decide:23.5, merge:null },
 
     { who:'agents/line-edit', seg:'paid', kind:'wording',
       from:'within fourteen days of the claim', to:'within 14 days of the claim',
-      t:19.0, classify:19.6, decide:21.0, merge:21.0 },
+      t:25.0, classify:27.2, decide:28.4, merge:28.7 },
 
     { who:'l.chen', seg:'person', kind:'meaning', by:'n.aalto', verdict:null,
       from:'decided by a person, not by an automated system', to:'decided by a person',
-      t:25.0, classify:26.2, decide:null },
+      t:30.0, classify:31.7, decide:null, merge:null },
 
     { who:'agents/citations', seg:'photo', kind:'wording',
       from:'is accepted', to:'is accepted under §4.2',
-      t:29.0, classify:29.6, decide:31.0, merge:31.0 }
+      t:33.0, classify:34.9, decide:36.1, merge:36.4 }
   ];
 
-  var HOLD = 33.0, TOTAL = 40.0;
+  var HOLD = 38.5, TOTAL = 45.0;
+
+  /* Keep only the span that actually changed: the common head and tail stay
+     put, so the caret works where a person's caret would. */
+  function diffOf(a, b) {
+    var p = 0;
+    while (p < a.length && p < b.length && a.charAt(p) === b.charAt(p)) p++;
+    var s = 0;
+    while (s < a.length - p && s < b.length - p &&
+           a.charAt(a.length - 1 - s) === b.charAt(b.length - 1 - s)) s++;
+    return {
+      pre:  a.slice(0, p),
+      aMid: a.slice(p, a.length - s),
+      bMid: b.slice(p, b.length - s),
+      post: a.slice(a.length - s)
+    };
+  }
+  EDITS.forEach(function (E) {
+    E.d = diffOf(E.from, E.to);
+    E.delDur = E.d.aMid.length / DEL_RATE;
+    E.typeDur = E.d.bMid.length / TYPE_RATE;
+    E.mergeDur = E.delDur + E.typeDur;
+    E.noteDur = E.to.length / TYPE_RATE;
+  });
+
+  var mergeBySlot = {};
+  EDITS.forEach(function (E) { if (E.merge != null) mergeBySlot[E.seg] = E; });
 
   /* ---------- build ---------- */
   var textEl = document.getElementById('text');
   var marginEl = document.getElementById('margin');
-  var slotEls = {}, secEls = [], inlineSlots = [];
+  var slots = {}, secEls = [], inlineSlots = [], secOf = {};
 
   DOC.forEach(function (S, si) {
     var sec = document.createElement('section');
     sec.className = 'sec';
-    var h = document.createElement('h2');
-    h.textContent = S.h;
+    var h = document.createElement('h2'); h.textContent = S.h;
     var p = document.createElement('p');
     S.p.forEach(function (part) {
       if (typeof part === 'string') { p.appendChild(document.createTextNode(part)); return; }
-      var s = document.createElement('span');
-      s.className = 'slot';
-      s.textContent = part.base;
-      slotEls[part.id] = s;
-      p.appendChild(s);
+      secOf[part.id] = si;
+      var wrap = document.createElement('span');
+      wrap.className = 'slot';
+      var pre = document.createElement('span');
+      var mid = document.createElement('span');
+      var cur = document.createElement('i'); cur.className = 'cur';
+      var post = document.createElement('span');
+      pre.textContent = part.base;
+      wrap.appendChild(pre); wrap.appendChild(mid); wrap.appendChild(cur); wrap.appendChild(post);
+      slots[part.id] = { wrap:wrap, pre:pre, mid:mid, cur:cur, post:post, base:part.base, last:null };
+      p.appendChild(wrap);
     });
-    var inl = document.createElement('div');
-    inl.className = 'inline-notes';
+    var inl = document.createElement('div'); inl.className = 'inline-notes';
     sec.appendChild(h); sec.appendChild(p); sec.appendChild(inl);
     textEl.appendChild(sec);
-    secEls.push(sec);
-    inlineSlots.push(inl);
-  });
-
-  var secOf = {};
-  DOC.forEach(function (S, si) {
-    S.p.forEach(function (part) { if (typeof part !== 'string') secOf[part.id] = si; });
+    secEls.push(sec); inlineSlots.push(inl);
   });
 
   var notes = EDITS.map(function (E) {
@@ -293,16 +341,16 @@ body{
     n.className = 'note ' + E.kind;
     var who = document.createElement('span');
     who.className = 'who mono'; who.textContent = E.who;
-    var chg = document.createElement('div');
-    chg.className = 'chg';
+    var chg = document.createElement('div'); chg.className = 'chg';
     var del = document.createElement('s'); del.textContent = E.from;
-    var ins = document.createElement('ins'); ins.textContent = E.to;
-    chg.appendChild(del); chg.appendChild(document.createTextNode(' ')); chg.appendChild(ins);
-    var chip = document.createElement('span');
-    chip.className = 'chip';
+    var ins = document.createElement('ins');
+    var cur = document.createElement('i'); cur.className = 'cur';
+    chg.appendChild(del); chg.appendChild(document.createTextNode(' '));
+    chg.appendChild(ins); chg.appendChild(cur);
+    var chip = document.createElement('span'); chip.className = 'chip';
     n.appendChild(who); n.appendChild(chg); n.appendChild(chip);
     marginEl.appendChild(n);
-    return { el:n, chip:chip, sig:null, h:0 };
+    return { el:n, ins:ins, cur:cur, chip:chip, sig:null, insLen:-1, h:0 };
   });
 
   function setChip(n, parts) {
@@ -330,23 +378,18 @@ body{
 
   function place() {
     var nowWide = window.innerWidth > 900;
-    if (nowWide !== wide) {
-      wide = nowWide;
-      notes.forEach(function (n, i) {
-        if (wide) { n.el.style.position = 'absolute'; marginEl.appendChild(n.el); }
-        else { n.el.style.position = 'static'; n.el.style.top = ''; inlineSlots[secOf[EDITS[i].seg]].appendChild(n.el); }
-      });
-      dirty = true;
-    }
+    if (nowWide === wide) return;
+    wide = nowWide;
+    notes.forEach(function (n, i) {
+      if (wide) { n.el.style.position = 'absolute'; marginEl.appendChild(n.el); }
+      else { n.el.style.position = 'static'; n.el.style.top = ''; inlineSlots[secOf[EDITS[i].seg]].appendChild(n.el); }
+    });
+    dirty = true;
   }
-
   function measure() {
-    if (!wide) return;
     notes.forEach(function (n) { n.h = n.el.offsetHeight; });
     dirty = false;
   }
-
-  /* stack visible notes against the line they annotate, pushing down on collision */
   function layoutMargin(vis) {
     if (!wide) return;
     if (dirty) measure();
@@ -354,8 +397,7 @@ body{
     var rows = [];
     EDITS.forEach(function (E, i) {
       if (vis[i] <= 0.01) return;
-      var el = slotEls[E.seg];
-      rows.push({ i:i, want: el.getBoundingClientRect().top - top0 });
+      rows.push({ i:i, want: slots[E.seg].wrap.getBoundingClientRect().top - top0 });
     });
     rows.sort(function (a, b) { return a.want - b.want; });
     var prev = -1e9;
@@ -371,32 +413,41 @@ body{
     var css = getComputedStyle(document.documentElement);
     var WORDING = css.getPropertyValue('--wording').trim();
     var MEANING = css.getPropertyValue('--meaning').trim();
-    var BLOCKED = css.getPropertyValue('--blocked').trim();
 
     var merged = 0, waiting = 0, blocked = 0;
-    var text = {}, tint = {}, pending = {};
-    Object.keys(slotEls).forEach(function (id) { tint[id] = null; pending[id] = false; });
-    DOC.forEach(function (S) {
-      S.p.forEach(function (part) { if (typeof part !== 'string') text[part.id] = part.base; });
-    });
+    var tint = {}, pending = {};
+    Object.keys(slots).forEach(function (id) { tint[id] = null; pending[id] = false; });
 
-    var vis = [], focus = [], chipChanged = false;
+    var vis = [], focus = [], changed = false;
 
     EDITS.forEach(function (E, i) {
-      var appear = ramp(T, E.t, E.t + 0.6);
+      var n = notes[i];
+      var appear = ramp(T, E.t, E.t + 0.5);
       vis[i] = appear;
+      n.el.style.opacity = appear;
 
-      var classified = T >= E.classify;
+      /* the editor composing the proposal in the margin, one character at a time */
+      var typed = T >= E.t ? Math.floor((T - E.t) * TYPE_RATE) : -1;
+      var shown = clamp(typed, 0, E.to.length);
+      if (typed < 0) shown = 0;
+      if (shown !== n.insLen) {
+        n.ins.textContent = E.to.slice(0, shown);
+        n.insLen = shown;
+        changed = true;
+      }
+      var composing = T >= E.t && typed < E.to.length;
+      n.cur.className = 'cur' + (composing ? ' on' : '');
+
+      var classified = T >= E.classify && !composing;
       var decided = E.decide != null && T >= E.decide;
-      var mergedNow = E.merge != null && T >= E.merge;
+      var merging = E.merge != null && T >= E.merge;
 
-      /* focus window: from arrival until a beat after it resolves */
       var until = (E.decide != null ? E.decide : E.classify + 2.5) + 1.6;
       focus[i] = ramp(T, E.t, E.t + 0.5) * (1 - ramp(T, until, until + 0.8));
 
       var cls = 'note ' + E.kind, parts;
       if (!classified) {
-        parts = [['reading the change', 'sub']];
+        parts = [[composing ? 'writing' : 'reading the change', 'sub']];
       } else if (E.kind === 'wording') {
         parts = decided ? [['wording', WORDING], [' · merged', 'sub']]
                         : [['wording', WORDING], [' · same meaning', 'sub']];
@@ -408,47 +459,64 @@ body{
         parts = [['meaning changed', MEANING], [' · blocked by ', 'sub'], [E.by, 'nm']];
         cls = 'note blocked';
       }
-      if (setChip(notes[i], parts)) chipChanged = true;
-      if (notes[i].el.className !== cls) { notes[i].el.className = cls; chipChanged = true; }
-      notes[i].el.style.opacity = appear;
+      if (setChip(n, parts)) changed = true;
+      if (n.el.className !== cls) { n.el.className = cls; changed = true; }
 
-      /* what the document says, and how the span is marked */
-      if (mergedNow) {
-        text[E.seg] = E.to;
-        var fresh = 1 - clamp((T - E.merge) / 1.8, 0, 1);
-        if (fresh > 0) tint[E.seg] = E.kind === 'meaning' ? 'var(--tint-m)' : 'var(--tint-w)';
+      /* counts and how the document span is marked */
+      if (merging) {
         merged++;
+        var fresh = 1 - clamp((T - (E.merge + E.mergeDur)) / 1.4, 0, 1);
+        if (fresh > 0) tint[E.seg] = E.kind === 'meaning' ? 'var(--tint-m)' : 'var(--tint-w)';
       } else if (classified && E.kind === 'meaning' && !decided) {
-        pending[E.seg] = true;
-        tint[E.seg] = 'var(--tint-m)';
-        waiting++;
+        pending[E.seg] = true; tint[E.seg] = 'var(--tint-m)'; waiting++;
       } else if (decided && E.verdict === 'block') {
+        blocked++;
         var f2 = 1 - clamp((T - E.decide) / 2.0, 0, 1);
         if (f2 > 0) tint[E.seg] = 'var(--tint-b)';
-        blocked++;
       }
     });
 
-    Object.keys(slotEls).forEach(function (id) {
-      var el = slotEls[id];
-      if (el.textContent !== text[id]) { el.textContent = text[id]; chipChanged = true; }
-      el.style.backgroundColor = tint[id] || 'transparent';
-      el.className = 'slot' + (pending[id] ? ' pending' : '');
+    /* the document itself: delete what it is losing, type what it is gaining */
+    Object.keys(slots).forEach(function (id) {
+      var S = slots[id], E = mergeBySlot[id];
+      var pre = S.base, mid = '', post = '', state = '';
+
+      if (E && T >= E.merge) {
+        var dt = T - E.merge, d = E.d;
+        pre = d.pre; post = d.post;
+        if (dt < E.delDur) {
+          var keep = d.aMid.length - Math.floor(dt * DEL_RATE);
+          mid = d.aMid.slice(0, Math.max(keep, 0));
+          state = 'deleting';
+        } else {
+          var k = Math.floor((dt - E.delDur) * TYPE_RATE);
+          mid = d.bMid.slice(0, Math.min(k, d.bMid.length));
+          if (k < d.bMid.length) state = 'typing';
+        }
+      }
+
+      var sig = pre + ' ' + mid + ' ' + post;
+      if (sig !== S.last) {
+        S.pre.textContent = pre; S.mid.textContent = mid; S.post.textContent = post;
+        S.last = sig;
+        changed = true;
+      }
+      S.cur.className = 'cur' + (state ? ' on' : '');
+      S.wrap.className = 'slot' + (pending[id] ? ' pending' : '') + (state ? ' ' + state : '');
+      S.wrap.style.backgroundColor = tint[id] || 'transparent';
     });
 
-    /* the view follows the active edit: its section stays lit, the rest recede */
+    /* the view follows whichever edit arrived most recently and is still live */
     var best = -1, bestT = -1;
     focus.forEach(function (f, i) { if (f > 0.15 && EDITS[i].t > bestT) { bestT = EDITS[i].t; best = i; } });
     var activeSec = best >= 0 ? secOf[EDITS[best].seg] : -1;
-    secEls.forEach(function (s, i) {
-      s.style.opacity = (activeSec < 0 || i === activeSec) ? 1 : 0.42;
-    });
+    secEls.forEach(function (s, i) { s.style.opacity = (activeSec < 0 || i === activeSec) ? 1 : 0.42; });
 
     cMerged.textContent = merged;
     cWaiting.textContent = waiting;
     cBlocked.textContent = blocked;
 
-    if (chipChanged) dirty = true;
+    if (changed) dirty = true;
     layoutMargin(vis);
   }
 

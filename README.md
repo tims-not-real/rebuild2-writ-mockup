@@ -20,7 +20,7 @@ That rule is the whole argument, and each page here shows it from a different di
 |---|---|
 | [`index.html`](index.html) | **The merge band.** Six edits across a document. Wording flows straight through review; a change of meaning stops at the review line and waits for a named person, who approves it or blocks it. |
 | [`contrast.html`](contrast.html) | **The same edits with no branches and no review.** Everyone types into one live document at once. Edits interrupt each other mid-keystroke and the sentences garble: fourteen changes, none reviewed. |
-| [`edits.html`](edits.html) | **A policy under review.** A short fares and concessions policy with seven edits landing on it over forty seconds. Each one is classified and resolved in the margin beside the line it touches, and the document changes only when something actually merges. |
+| [`edits.html`](edits.html) | **A policy under review.** A short fares and concessions policy with seven edits landing on it over forty-five seconds. Each editor types their proposal into the margin a character at a time; when an edit merges, the document deletes the words it is losing and types the words it is gaining. |
 | [`explainer.html`](explainer.html) | **The hackathon explainer.** The two-scene animation Writ showed at Rebuild 2, rebuilt from the gif in the prototypes collection. |
 
 Open any of them directly. No server, no install, no build.
@@ -74,6 +74,11 @@ Three things worth naming:
   meaning is in its geometry would have broken it; picking between two authored sizes does not.
 - **Theme follows the reader.** Both token sets ship, and the pages follow
   `prefers-color-scheme`. `prefers-reduced-motion` holds the poster frame instead of autoplaying.
+- **Editing is retyped, not swapped.** Text changes run character by character — deletion at 26
+  characters a second, typing at 15, because removing text is one movement and composing it is
+  not. Only the span that actually changed is retyped: the common head and tail stay put, so
+  "within fourteen days of the claim" becoming "within 14 days of the claim" deletes eight
+  characters and types two rather than rewriting the clause.
 
 ## Licence
 
