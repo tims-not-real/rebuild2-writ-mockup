@@ -20,11 +20,10 @@ That rule is the whole argument, and each page shows it from a different distanc
 
 | | |
 |---|---|
-| [`index.html`](index.html) | **Overview.** The product explained in words, with a static diagram of the rule and links into the four animations. Start here. |
+| [`index.html`](index.html) | **Overview.** The product explained in words, with a static diagram of the rule and links into the three animations. Start here. |
 | [`merge.html`](merge.html) | **Merge.** Six edits across a document. Wording flows straight through the review line; a change of meaning stops at it and waits for a named person, who approves or blocks. |
 | [`contrast.html`](contrast.html) | **Without review.** The same edits with no branches. Everyone types into one live document at once, edits interrupt each other mid-keystroke, and the sentences garble: fourteen changes, none reviewed. |
 | [`edits.html`](edits.html) | **A policy under review.** A short fares and concessions policy taking seven edits over forty-five seconds. Each editor types their proposal into the margin a character at a time; when an edit merges, the document deletes the words it is losing and types the words it is gaining. |
-| [`explainer.html`](explainer.html) | **Explainer.** The two-scene animation Writ showed at Rebuild 2, rebuilt from the gif in the prototypes collection. |
 
 Open any of them directly. No server, no install, no build.
 
@@ -43,9 +42,7 @@ browser can play but a person cannot read or diff. These are ports to plain SVG 
 `requestAnimationFrame` loop. **The geometry, every edit, every authored second and the scene
 cues are unchanged** — only the runtime is different.
 
-`index.html` and `edits.html` were built from scratch for this repo. `explainer.html` was rebuilt
-from `gifs/writ.gif` in the prototypes collection, frame by frame. The source gif is light only;
-its dark palette here is an addition, so that the toggle does something on every page.
+`index.html` and `edits.html` were built from scratch for this repo.
 
 ### A note on the sentences
 
@@ -63,14 +60,14 @@ the argument for reading edits by meaning in one line.
 
 ## Stack
 
-Five self-contained HTML files. Inline CSS, inline SVG, vanilla JavaScript, no dependencies and
+Four self-contained HTML files. Inline CSS, inline SVG, vanilla JavaScript, no dependencies and
 no build step.
 
 A framework would have bought a `node_modules` and a lockfile to go stale, in exchange for
 nothing: these are fixed-script animations with no data and no interaction beyond a scrub bar.
 A single file also stays runnable years from now, which matters more for an archived artefact
 than for a product. The cost is that the top bar and the theme script are duplicated across the
-five files; that seemed the better trade than a build step or a shared asset to lose.
+four files; that seemed the better trade than a build step or a shared asset to lose.
 
 Four things worth naming:
 

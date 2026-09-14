@@ -91,6 +91,7 @@ em.m{color:var(--meaning);background:rgba(184,120,26,0.12)}
 
 /* ---------- directory ---------- */
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.cards .card:last-child{grid-column:1/-1}
 .card{
   display:block;text-decoration:none;color:inherit;
   border:1px solid var(--rule);padding:15px 16px 16px;
@@ -129,7 +130,6 @@ em.m{color:var(--meaning);background:rgba(184,120,26,0.12)}
       <a href="merge.html">Merge</a>
       <a href="contrast.html">Without review</a>
       <a href="edits.html">Policy</a>
-      <a href="explainer.html">Explainer</a>
     </span>
     <button class="theme" id="theme" type="button">Dark</button>
   </nav>
@@ -219,7 +219,7 @@ em.m{color:var(--meaning);background:rgba(184,120,26,0.12)}
 
   <h2>See it work</h2>
   <p>
-    Four pages, each showing the same rule from a different distance. They play themselves; every
+    Three pages, each showing the same rule from a different distance. They play themselves; every
     one has a scrub bar if you would rather step through it.
   </p>
 
@@ -240,12 +240,6 @@ em.m{color:var(--meaning);background:rgba(184,120,26,0.12)}
       <span class="n">03 · the rule on real prose</span>
       <span class="t">A policy under review</span>
       <span class="d">A fares policy taking seven edits. Each editor types their proposal in the margin; a merge deletes the words the document is losing and types the ones it is gaining.</span>
-      <span class="go">Open &rarr;</span>
-    </a>
-    <a class="card" href="explainer.html">
-      <span class="n">04 · the hackathon original</span>
-      <span class="t">Explainer</span>
-      <span class="d">The two-scene animation Writ showed at Rebuild 2 in Helsinki, rebuilt frame by frame from the gif in the prototypes collection.</span>
       <span class="go">Open &rarr;</span>
     </a>
   </div>
