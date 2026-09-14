@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writ — wording flows through, meaning waits</title>
+<meta name="description" content="Writ merge animation: wording flows through review, meaning stops and waits for a person.">
+<!--
+  Writ — "wording flows through; meaning stops and waits for a person"
+
+  The authored piece is a React scene rendered on a composition stage. This is a
+  port of it to plain SVG plus one requestAnimationFrame loop, so the page is
+  self-contained and has no build step. The two slot geometries, the six edits,
+  the authored seconds and the scene cues are unchanged.
+
+  Handles and sentences are paraphrases of real philosophical disagreements —
+  Plato and Aristotle on Forms, Hobbes and Rousseau on human nature, Nietzsche
+  on the source of morality. They are paraphrases, not quotations.
+-->
+<script>try{var t=localStorage.getItem('writ-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{
+  --bg:#faf9f6; --ink:#1c1b18; --muted:#77726a; --hair:#1c1b18;
+  --meaning:#b8781a; --wording:#2f7d4f; --blocked:#b3362b;
+  --rule:rgba(28,27,24,0.14); --chip:rgba(28,27,24,0.07); --panel:rgba(28,27,24,0.025);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:#ece8df;
+    --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+    --rule:rgba(236,232,223,0.16); --chip:rgba(236,232,223,0.09); --panel:rgba(236,232,223,0.03);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:#ece8df;
+  --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+  --rule:rgba(236,232,223,0.16); --chip:rgba(236,232,223,0.09); --panel:rgba(236,232,223,0.03);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 40px}
+.masthead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:26px}
+.mark{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.tagline{font-size:13px;color:var(--muted)}
+.fit{position:relative;width:100%;overflow:hidden}
+.piece{position:absolute;left:0;top:0;transform-origin:0 0}
+.zoom{position:absolute;inset:0}
+svg.diagram{position:absolute;left:0;top:0;overflow:visible}
+.lbl{position:absolute;font-size:13px;font-weight:400;color:var(--muted);line-height:1.3;white-space:nowrap}
+.handle-col{position:absolute;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.handle{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);white-space:nowrap;background:var(--bg);padding:1px 5px;margin:0 -5px}
+.prose{font-family:Newsreader,Georgia,serif;color:var(--ink);line-height:1.25;text-wrap:pretty;background:var(--bg);padding:1px 5px;margin:0 -5px}
+.prose s{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.chip{position:absolute;display:flex;font-weight:500;line-height:1.3;white-space:nowrap;transform-origin:left center}
+.chip span{white-space:pre}
+.chip .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:400;color:var(--ink)}
+.controls{display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap}
+.ctrl{
+  font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:1px solid var(--muted);
+  border-radius:999px;padding:5px 13px;cursor:pointer;
+}
+.ctrl:hover{color:var(--ink);border-color:var(--ink)}
+.scrub{flex:1;min-width:160px;accent-color:var(--meaning)}
+.cue{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--muted);min-width:16ch}
+.nav{margin-top:26px;font-size:12.5px;color:var(--muted)}
+.nav a{color:var(--muted)}
+.foot{margin-top:30px;font-size:11.5px;color:var(--muted);line-height:1.6;max-width:70ch}
+.foot a{color:var(--muted)}
+
+.topbar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-bottom:13px;margin-bottom:22px;border-bottom:1px solid var(--rule)}
+.brand{font-size:17px;font-weight:600;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-right:auto}
+.tabs a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:999px;transition:color .2s,background-color .2s}
+.tabs a:hover{color:var(--ink);background:var(--panel)}
+.tabs a[aria-current="page"]{color:var(--ink);background:var(--chip)}
+.theme{font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
+.theme:hover{color:var(--ink);border-color:var(--muted)}
+.pagesub{margin:0 0 24px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.morelinks{margin-top:26px;display:flex;gap:10px;flex-wrap:wrap}
+.morelinks a{font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:6px 13px;transition:color .2s,border-color .2s,background-color .2s}
+.morelinks a:hover{color:var(--ink);border-color:var(--muted);background:var(--panel)}
+@media (max-width:620px){.tabs{width:100%;order:3;margin-right:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topbar">
+    <a class="brand" href="index.html">writ</a>
+    <span class="tabs">
+      <a href="index.html">Overview</a>
+      <a href="merge.html" aria-current="page">Merge</a>
+      <a href="contrast.html">Without review</a>
+      <a href="edits.html">Policy</a>
+      <a href="explainer.html">Explainer</a>
+    </span>
+    <button class="theme" id="theme" type="button">Dark</button>
+  </nav>
+
+  <p class="pagesub">Wording flows through review. A change of meaning stops at it and waits for a named person.</p>
+
+  <div class="fit" id="fit"><div class="piece" id="piece"></div></div>
+
+  <div class="controls">
+    <button class="ctrl" id="toggle" type="button">Pause</button>
+    <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub the animation">
+    <span class="cue" id="cue">0.0s</span>
+  </div>
+
+  <div class="morelinks">
+    <a href="index.html">← Overview</a>
+    <a href="contrast.html">The same edits without review</a>
+    <a href="edits.html">The rule on a real policy</a>
+  </div>
+
+  <p class="foot">
+    Visual mockup from the Rebuild 2 collection, Helsinki 2026 —
+    <a href="https://github.com/rebuild-digital/Rebuild-2-Prototypes">rebuild-digital/Rebuild-2-Prototypes</a>.
+    Not the Writ product. Handles and sentences are paraphrases of real philosophical
+    disagreements, not quotations.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- runtime ---------- */
+  var clamp = function (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; };
+  var Easing = {
+    easeOutCubic:   function (u) { return 1 - Math.pow(1 - u, 3); },
+    easeInOutCubic: function (u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; },
+    easeOutBack:    function (u) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); }
+  };
+  function animate(o) {
+    return function (T) {
+      if (T <= o.start) return o.from;
+      if (T >= o.end) return o.to;
+      var u = (T - o.start) / (o.end - o.start);
+      return o.from + (o.to - o.from) * o.ease(u);
+    };
+  }
+
+  /* ---------- scenes ---------- */
+  var SCENES = [
+    ['Document', 2.4], ['Edits', 4.1], ['Meaning', 3.1], ['Approval', 2.9],
+    ['Hobbes', 3], ['Nietzsche', 7.2], ['Reset', 1.5]
+  ];
+  var CUES = {}, TOTAL = 0;
+  SCENES.forEach(function (s) { CUES[s[0]] = TOTAL; TOTAL += s[1]; });
+
+  /* ---------- geometry ---------- */
+  var LAYOUTS = {
+    band: { w:1116, h:380, y:190, x0:70, x1:1046, bxa:140, bxb:1020, rx:660, R:52, r:6.5, sw:2, up:[62,136], down:[50,100], fs:{prose:19,ui:13,mono:13} },
+    hero: { w:520,  h:470, y:235, x0:24, x1:496,  bxa:76,  bxb:440,  rx:245, R:34, r:5.5, sw:2, up:[62,150], down:[50,105], fs:{prose:15,ui:12,mono:12}, short:true }
+  };
+
+  var STOP = 1.5, PASS = 2.6, MERGE = 1.2;
+  var EDITS = [
+    { who:'agents/copyedit',  sign:-1, lane:0, kind:'wording', u0:0.00,  u1:0.86, t:2.0,  go:3.0 },
+    { who:'@aristotle',       sign: 1, lane:0, kind:'meaning', u0:0.045, u1:0.91, t:3.4,  go:5.0,  ok:9.6,  verdict:'approve', by:'@plato',
+      text:['Reality consists of ', 'Forms', 'the things we see', '.'] },
+    { who:'agents/line-edit', sign:-1, lane:1, kind:'wording', u0:0.18,  u1:0.98, t:7.0,  go:8.4 },
+    { who:'@t-hobbes',        sign: 1, lane:1, kind:'meaning', u0:0.14,  u1:0.95, t:9.4,  go:10.8, ok:14.4, verdict:'block',   by:'@j-rousseau',
+      text:['Man is by nature ', 'good', 'at war', '.'] },
+    { who:'@f-nietzsche',     sign: 1, lane:0, kind:'meaning', u0:0.07,  u1:0.93, t:15.0, go:16.6, ok:20.4, verdict:'block',   by:'agents/guidelines',
+      text:['Morality comes from ', 'God', 'the will to power', '.'] },
+    { who:'agents/citations', sign:-1, lane:0, kind:'wording', u0:0.30,  u1:1.00, t:16.8, go:18.0 }
+  ];
+
+  var MOTION = {
+    enter: function (T, s, e) { return animate({ from:0, to:1, start:s, end:e, ease:Easing.easeOutCubic })(T); },
+    draw:  function (T, s, e) { return animate({ from:0, to:1, start:s, end:e, ease:Easing.easeInOutCubic })(T); },
+    pop:   function (T, s, d, pulse) {
+      d = d || 0.45;
+      if (T <= s) return pulse ? 1 : 0;
+      var u = clamp((T - s) / d, 0, 1);
+      return pulse ? 1 + 0.32 * Math.sin(Math.PI * u) : Easing.easeOutBack(u);
+    }
+  };
+
+  var smooth = function (u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+  function branchY(L, sign, rise, bx0, bx1, x) {
+    var f = 0;
+    if (x <= bx0 || x >= bx1) f = 0;
+    else if (x < bx0 + L.R) f = smooth((x - bx0) / L.R);
+    else if (x <= bx1 - L.R) f = 1;
+    else f = 1 - smooth((x - (bx1 - L.R)) / L.R);
+    return L.y - sign * rise * f;
+  }
+  function branchPts(L, sign, rise, bx0, bx1, xa, xb) {
+    var pts = [], n = Math.max(2, Math.ceil((xb - xa) / 4));
+    for (var i = 0; i <= n; i++) {
+      var x = xa + (xb - xa) * i / n;
+      pts.push(x.toFixed(1) + ',' + branchY(L, sign, rise, bx0, bx1, x).toFixed(2));
+    }
+    return pts.join(' ');
+  }
+  function invEase(ease, target) {
+    var lo = 0, hi = 1;
+    for (var i = 0; i < 40; i++) { var m = (lo + hi) / 2; if (ease(m) < target) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  }
+
+  /* ---------- per-edit state at time T ---------- */
+  function editState(E, T, L, tok) {
+    var bx0 = L.bxa + E.u0 * (L.bxb - L.bxa), bx1 = L.bxa + E.u1 * (L.bxb - L.bxa);
+    var rise = (E.sign > 0 ? L.up : L.down)[E.lane];
+    var drawA = MOTION.draw(T, E.t, E.t + 1.1), drawB = MOTION.draw(T, E.t + 0.8, E.t + 1.8);
+    var gone = E.verdict === 'approve' ? 1 - MOTION.draw(T, E.ok + 0.8, E.ok + 1.2) : 1;
+    var handleOp = MOTION.enter(T, E.t + 1.0, E.t + 1.5) * gone;
+    var proseOp  = MOTION.enter(T, E.t + 1.6, E.t + 2.2) * gone;
+    var x, tCross, tArr = Infinity, stopped = false, decided = false, passed = false;
+    var fill = tok.ink, stroke = tok.ink;
+
+    if (E.kind === 'wording') {
+      var p = MOTION.draw(T, E.go, E.go + PASS);
+      x = bx0 + (bx1 - bx0) * p;
+      tCross = E.go + invEase(Easing.easeInOutCubic, (L.rx - bx0) / (bx1 - bx0)) * PASS;
+      passed = T >= tCross; tArr = E.go + PASS;
+      if (passed) { fill = tok.wording; stroke = tok.wording; }
+    } else {
+      tCross = E.go + STOP;
+      var p1 = MOTION.draw(T, E.go, tCross);
+      stopped = T >= tCross; decided = T >= E.ok;
+      x = bx0 + (L.rx - bx0) * p1;
+      if (E.verdict === 'approve') { var go2 = E.ok + 0.8; tArr = go2 + MERGE; x += (bx1 - L.rx) * MOTION.draw(T, go2, tArr); }
+      if (stopped) {
+        stroke = tok.meaning; fill = tok.bg;
+        if (decided) { fill = E.verdict === 'approve' ? tok.meaning : tok.blocked; if (E.verdict === 'block') stroke = tok.blocked; }
+      }
+    }
+
+    var y = branchY(L, E.sign, rise, bx0, bx1, x);
+    var tEnd = E.verdict === 'block' ? E.ok + 1.4 : tArr;
+    var branchOp = 1 - MOTION.draw(T, tEnd + 0.2, tEnd + 0.9);
+    var nodeIn = MOTION.pop(T, E.go - 0.45);
+    var nodeOut = E.verdict === 'block' ? branchOp : 1 - MOTION.draw(T, tArr, tArr + 0.3);
+    var pulse = ((stopped || passed) ? MOTION.pop(T, tCross, 0.5, true) : 1) * (decided ? MOTION.pop(T, E.ok, 0.5, true) : 1);
+    var nodeScale = nodeIn * nodeOut * pulse;
+    var dashedOp = E.kind === 'meaning'
+      ? MOTION.enter(T, tCross + 0.1, tCross + 0.5) * (E.verdict === 'approve' ? 1 - MOTION.draw(T, E.ok + 0.3, E.ok + 0.7) : branchOp)
+      : 0;
+
+    var chip, chipOp;
+    if (E.kind === 'wording') {
+      chip = [['wording', tok.wording]];
+      chipOp = MOTION.enter(T, tCross, tCross + 0.3) * (1 - MOTION.draw(T, tCross + 1.0, tCross + 1.3));
+    } else {
+      chipOp = MOTION.enter(T, tCross + 0.2, tCross + 0.6) * branchOp * (E.verdict === 'approve' ? 1 - MOTION.draw(T, E.ok + 0.8, E.ok + 1.2) : 1);
+      if (!decided) chip = [['meaning', tok.meaning], [' · needs ', tok.muted], [E.by, 'mono']];
+      else if (E.verdict === 'approve') chip = [['meaning', tok.meaning], [' · ', tok.muted], [E.by, 'mono'], [' approved', tok.meaning]];
+      else chip = L.short
+        ? [['meaning', tok.meaning], [' · ', tok.muted], [E.by, 'mono'], [' blocked', tok.blocked]]
+        : [['meaning', tok.meaning], [' · blocked by ', tok.blocked], [E.by, 'mono']];
+    }
+    var chipScale = decided ? Math.min(MOTION.pop(T, E.ok, 0.5, true), 1.12) : 1;
+
+    return { bx0:bx0, bx1:bx1, rise:rise, drawA:drawA, drawB:drawB, handleOp:handleOp, proseOp:proseOp,
+             x:x, y:y, fill:fill, stroke:stroke, nodeScale:nodeScale, branchOp:branchOp, dashedOp:dashedOp,
+             chip:chip, chipOp:chipOp, chipScale:chipScale, tArr:tArr };
+  }
+
+  /* ---------- build the DOM once per layout ---------- */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var piece = document.getElementById('piece');
+  var fit = document.getElementById('fit');
+  var L = null, tok = null, N = null;
+
+  function tokens() {
+    var cs = getComputedStyle(document.documentElement);
+    var g = function (n) { return cs.getPropertyValue(n).trim(); };
+    return { bg:g('--bg'), ink:g('--ink'), muted:g('--muted'), hair:g('--hair'),
+             meaning:g('--meaning'), wording:g('--wording'), blocked:g('--blocked') };
+  }
+
+  function line() {
+    var el = document.createElementNS(SVGNS, 'polyline');
+    el.setAttribute('fill', 'none');
+    el.setAttribute('stroke-linecap', 'round');
+    el.setAttribute('stroke-linejoin', 'round');
+    return el;
+  }
+  function setLine(el, pts, color, w, p, dashed, opacity) {
+    var drawing = p < 1;
+    el.setAttribute('points', pts);
+    el.setAttribute('stroke', color);
+    el.setAttribute('stroke-width', w);
+    if (drawing) {
+      el.setAttribute('pathLength', '1');
+      el.setAttribute('stroke-dasharray', '1');
+      el.setAttribute('stroke-dashoffset', String(1 - p));
+    } else {
+      el.removeAttribute('pathLength');
+      el.removeAttribute('stroke-dashoffset');
+      if (dashed) el.setAttribute('stroke-dasharray', '5 7'); else el.removeAttribute('stroke-dasharray');
+    }
+    el.style.opacity = opacity == null ? (p > 0 ? 1 : 0) : opacity;
+  }
+
+  function build(layoutName) {
+    L = LAYOUTS[layoutName];
+    tok = tokens();
+    piece.innerHTML = '';
+    piece.style.width = L.w + 'px';
+    piece.style.height = L.h + 'px';
+    piece.style.background = tok.bg;
+
+    var zoom = document.createElement('div');
+    zoom.className = 'zoom';
+    zoom.style.transformOrigin = L.rx + 'px ' + (L.y - L.up[0] * 0.5) + 'px';
+    piece.appendChild(zoom);
+
+    var svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('class', 'diagram');
+    svg.setAttribute('width', L.w); svg.setAttribute('height', L.h);
+    svg.setAttribute('viewBox', '0 0 ' + L.w + ' ' + L.h);
+    zoom.appendChild(svg);
+
+    var said = line(), proposed = line(), review = line();
+    svg.appendChild(said); svg.appendChild(proposed); svg.appendChild(review);
+
+    var branches = EDITS.map(function () {
+      var g = document.createElementNS(SVGNS, 'g');
+      var a = line(), b = line(), d = line();
+      g.appendChild(a); g.appendChild(b); g.appendChild(d);
+      svg.appendChild(g);
+      return { g:g, a:a, b:b, d:d };
+    });
+    var nodes = EDITS.map(function () {
+      var c = document.createElementNS(SVGNS, 'circle');
+      c.setAttribute('r', L.r); c.setAttribute('stroke-width', L.sw);
+      svg.appendChild(c);
+      return c;
+    });
+
+    function mk(cls) { var d = document.createElement('div'); d.className = cls; zoom.appendChild(d); return d; }
+
+    var lblSaid = mk('lbl'), lblProp = mk('lbl'), lblRev = mk('lbl');
+    lblSaid.textContent = 'what it says'; lblProp.textContent = 'proposed'; lblRev.textContent = 'review';
+    [lblSaid, lblProp, lblRev].forEach(function (e) { e.style.fontSize = L.fs.ui + 'px'; });
+    lblSaid.style.left = L.x0 + 'px'; lblSaid.style.top = (L.y - 26) + 'px';
+    lblProp.style.right = (L.w - L.x1) + 'px'; lblProp.style.top = (L.short ? L.y + 10 : L.y - 26) + 'px';
+    lblRev.style.left = (L.rx + 9) + 'px'; lblRev.style.top = '10px';
+
+    var cols = EDITS.map(function (E) {
+      var col = mk('handle-col');
+      var h = document.createElement('div');
+      h.className = 'handle'; h.style.fontSize = L.fs.mono + 'px'; h.textContent = E.who;
+      col.appendChild(h);
+      var pr = null;
+      if (E.text) {
+        pr = document.createElement('div');
+        pr.className = 'prose'; pr.style.fontSize = L.fs.prose + 'px';
+        pr.appendChild(document.createTextNode(E.text[0]));
+        var st = document.createElement('s'); st.textContent = E.text[1]; pr.appendChild(st);
+        pr.appendChild(document.createTextNode(' ' + E.text[2] + E.text[3]));
+        col.appendChild(pr);
+      }
+      return { col:col, h:h, pr:pr };
+    });
+
+    var chips = EDITS.map(function () {
+      var c = mk('chip'); c.style.fontSize = L.fs.ui + 'px';
+      return { el:c, sig:null };
+    });
+
+    N = { zoom:zoom, said:said, proposed:proposed, review:review, branches:branches, nodes:nodes,
+          lblSaid:lblSaid, lblProp:lblProp, lblRev:lblRev, cols:cols, chips:chips };
+    resize();
+  }
+
+  function resize() {
+    if (!L) return;
+    var w = fit.clientWidth;
+    var s = Math.min(1, w / L.w);
+    piece.style.transform = 'scale(' + s + ')';
+    fit.style.height = (L.h * s) + 'px';
+  }
+
+  /* ---------- render one frame ---------- */
+  function rises(el, o) { el.style.opacity = o; el.style.transform = 'translateY(' + ((1 - o) * 6) + 'px)'; }
+
+  function render(T) {
+    tok = tokens();
+    piece.style.background = tok.bg;
+    var mainP = MOTION.draw(T, 0, 1.4);
+    var endLbl = MOTION.enter(T, 1.1, 1.9);
+    var revP = MOTION.draw(T, 1.5, 2.4);
+    var revLbl = MOTION.enter(T, 2.0, 2.4);
+    var S = EDITS.map(function (E) { return editState(E, T, L, tok); });
+    var merges = S.filter(function (s) { return isFinite(s.tArr); });
+    var faintOp = 0.28 + merges.reduce(function (a, s) { return a + (0.72 / merges.length) * MOTION.draw(T, s.tArr, s.tArr + 0.4); }, 0);
+    var zoomV = 1 + 0.04 * MOTION.draw(T, CUES.Meaning, CUES.Meaning + 2.4) - 0.04 * MOTION.draw(T, CUES.Approval, CUES.Approval + 1.6);
+    var fade = 1 - MOTION.draw(T, CUES.Reset + 0.2, CUES.Reset + 1.2);
+
+    piece.style.opacity = fade;
+    N.zoom.style.transform = 'scale(' + zoomV + ')';
+
+    var segP = function (a, b) { return clamp((mainP * (L.x1 - L.x0) - (a - L.x0)) / (b - a), 0, 1); };
+    setLine(N.said, L.x0 + ',' + L.y + ' ' + L.rx + ',' + L.y, tok.hair, L.sw, segP(L.x0, L.rx));
+    var pp = segP(L.rx, L.x1);
+    setLine(N.proposed, L.rx + ',' + L.y + ' ' + L.x1 + ',' + L.y, tok.hair, L.sw, pp, false, pp > 0 ? faintOp : 0);
+    setLine(N.review, L.rx + ',22 ' + L.rx + ',' + (L.h - 22), tok.muted, 1.5, revP, true);
+
+    EDITS.forEach(function (E, i) {
+      var s = S[i], b = N.branches[i];
+      b.g.style.opacity = s.branchOp;
+      setLine(b.a, branchPts(L, E.sign, s.rise, s.bx0, s.bx1, s.bx0, L.rx), tok.hair, L.sw, s.drawA);
+      setLine(b.b, branchPts(L, E.sign, s.rise, s.bx0, s.bx1, L.rx, s.bx1), tok.hair, L.sw, s.drawB, false, s.drawB > 0 ? 1 - s.dashedOp : 0);
+      if (E.kind === 'meaning') {
+        var col = (E.verdict === 'block' && T >= E.ok) ? tok.blocked : tok.meaning;
+        setLine(b.d, branchPts(L, E.sign, s.rise, s.bx0, s.bx1, L.rx, s.bx1), col, L.sw, 1, true, s.dashedOp);
+      } else {
+        b.d.style.opacity = 0;
+      }
+
+      var c = N.nodes[i];
+      c.setAttribute('cx', s.x); c.setAttribute('cy', s.y);
+      c.setAttribute('fill', s.fill); c.setAttribute('stroke', s.stroke);
+      c.style.transformOrigin = s.x + 'px ' + s.y + 'px';
+      c.style.transform = 'scale(' + s.nodeScale + ')';
+
+      var by = L.y - E.sign * s.rise, below = E.sign < 0 || E.lane === 1;
+      var col2 = N.cols[i];
+      col2.col.style.opacity = s.branchOp;
+      col2.col.style.left = (s.bx0 + L.R + 4) + 'px';
+      col2.col.style.maxWidth = ((E.text && L.short ? L.w - 16 : L.rx - 12) - (s.bx0 + L.R + 4)) + 'px';
+      if (below) { col2.col.style.top = (by + 8) + 'px'; col2.col.style.transform = 'none'; }
+      else { col2.col.style.top = (by - 8) + 'px'; col2.col.style.transform = 'translateY(-100%)'; }
+      rises(col2.h, s.handleOp);
+      if (col2.pr) rises(col2.pr, s.proseOp);
+
+      var onLine = E.kind === 'meaning';
+      var ch = N.chips[i];
+      var sig = s.chip.map(function (p) { return p[0] + '|' + p[1]; }).join('~');
+      if (sig !== ch.sig) {
+        ch.sig = sig;
+        ch.el.innerHTML = '';
+        s.chip.forEach(function (p) {
+          var sp = document.createElement('span');
+          sp.textContent = p[0];
+          if (p[1] === 'mono') sp.className = 'mono';
+          else { sp.style.color = p[1]; sp.style.fontWeight = (p[1] === tok.muted) ? 400 : 500; }
+          ch.el.appendChild(sp);
+        });
+      }
+      ch.el.style.left = (L.rx + 12) + 'px';
+      ch.el.style.top = (onLine ? by : (E.sign > 0 ? by - 8 : by + 8)) + 'px';
+      ch.el.style.transform = (onLine ? 'translateY(-50%) ' : (E.sign > 0 ? 'translateY(-100%) ' : '')) + 'scale(' + s.chipScale + ')';
+      ch.el.style.opacity = s.chipOp;
+      ch.el.style.background = onLine ? tok.bg : 'transparent';
+      ch.el.style.padding = L.short ? '1px 4px' : '1px 6px';
+      ch.el.style.color = tok.ink;
+    });
+
+    rises(N.lblSaid, endLbl); rises(N.lblProp, endLbl); rises(N.lblRev, revLbl);
+  }
+
+  /* ---------- playback ---------- */
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var POSTER = CUES.Meaning + 2.6;
+  var T = 0, playing = !reduced, last = null;
+  var toggle = document.getElementById('toggle');
+  var scrub = document.getElementById('scrub');
+  var cueEl = document.getElementById('cue');
+
+  function sceneName(t) {
+    var name = SCENES[0][0], acc = 0;
+    for (var i = 0; i < SCENES.length; i++) { if (t >= acc) name = SCENES[i][0]; acc += SCENES[i][1]; }
+    return name;
+  }
+  function stamp() {
+    cueEl.textContent = T.toFixed(1) + 's ' + sceneName(T);
+    scrub.value = Math.round((T / TOTAL) * 1000);
+  }
+
+  function frame(ts) {
+    if (last == null) last = ts;
+    var dt = (ts - last) / 1000; last = ts;
+    if (playing) { T = (T + dt) % TOTAL; render(T); stamp(); }
+    requestAnimationFrame(frame);
+  }
+
+  toggle.addEventListener('click', function () {
+    playing = !playing;
+    toggle.textContent = playing ? 'Pause' : 'Play';
+  });
+  scrub.addEventListener('input', function () {
+    playing = false; toggle.textContent = 'Play';
+    T = (scrub.value / 1000) * TOTAL;
+    render(T); stamp();
+  });
+
+  function pick() { return fit.clientWidth >= 760 ? 'band' : 'hero'; }
+  var current = null;
+  function ensure() {
+    var want = pick();
+    if (want !== current) { current = want; build(want); }
+    else resize();
+    render(T); stamp();
+  }
+
+  window.addEventListener('resize', ensure);
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onTheme = function () { current = null; ensure(); };
+    if (mq.addEventListener) mq.addEventListener('change', onTheme);
+    else if (mq.addListener) mq.addListener(onTheme);
+    window.addEventListener('writ:theme', onTheme);
+  }
+
+  ensure();
+  if (reduced) { T = POSTER; toggle.textContent = 'Play'; render(T); stamp(); }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+(function () {
+  var root = document.documentElement, KEY = 'writ-theme';
+  var btn = document.getElementById('theme');
+  function isDark() {
+    var set = root.getAttribute('data-theme');
+    if (set) return set === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function label() {
+    var d = isDark();
+    btn.textContent = d ? 'Light' : 'Dark';
+    btn.setAttribute('aria-label', d ? 'Switch to the light theme' : 'Switch to the dark theme');
+  }
+  btn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    label();
+    window.dispatchEvent(new CustomEvent('writ:theme'));
+  });
+  label();
+})();
+</script>
+</body>
+</html>

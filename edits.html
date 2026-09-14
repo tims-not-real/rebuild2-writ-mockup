@@ -28,23 +28,27 @@
 
   The policy is invented. So are the handles.
 -->
+<script>try{var t=localStorage.getItem('writ-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
 :root{
   --bg:#faf9f6; --ink:#1c1b18; --muted:#77726a; --hair:rgba(28,27,24,0.16);
   --meaning:#b8781a; --wording:#2f7d4f; --blocked:#b3362b;
   --tint-w:rgba(47,125,79,0.14); --tint-m:rgba(184,120,26,0.16); --tint-b:rgba(179,54,43,0.14);
+  --rule:rgba(28,27,24,0.14); --chip:rgba(28,27,24,0.07); --panel:rgba(28,27,24,0.025);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.16);
     --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
     --tint-w:rgba(95,185,129,0.17); --tint-m:rgba(227,166,58,0.17); --tint-b:rgba(226,107,95,0.17);
+    --rule:rgba(236,232,223,0.16); --chip:rgba(236,232,223,0.09); --panel:rgba(236,232,223,0.03);
   }
 }
 :root[data-theme="dark"]{
   --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.16);
   --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
   --tint-w:rgba(95,185,129,0.17); --tint-m:rgba(227,166,58,0.17); --tint-b:rgba(226,107,95,0.17);
+  --rule:rgba(236,232,223,0.16); --chip:rgba(236,232,223,0.09); --panel:rgba(236,232,223,0.03);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -144,15 +148,38 @@ body{
 @media (min-width:901px){
   .inline-notes{display:none}
 }
+
+.topbar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-bottom:13px;margin-bottom:22px;border-bottom:1px solid var(--rule)}
+.brand{font-size:17px;font-weight:600;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-right:auto}
+.tabs a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:999px;transition:color .2s,background-color .2s}
+.tabs a:hover{color:var(--ink);background:var(--panel)}
+.tabs a[aria-current="page"]{color:var(--ink);background:var(--chip)}
+.theme{font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
+.theme:hover{color:var(--ink);border-color:var(--muted)}
+.pagesub{margin:0 0 24px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.morelinks{margin-top:26px;display:flex;gap:10px;flex-wrap:wrap}
+.morelinks a{font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:6px 13px;transition:color .2s,border-color .2s,background-color .2s}
+.morelinks a:hover{color:var(--ink);border-color:var(--muted);background:var(--panel)}
+@media (max-width:620px){.tabs{width:100%;order:3;margin-right:0}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="masthead">
-    <span class="mark">writ</span>
-    <span class="tagline">a policy under review — wording merges, meaning waits for a person</span>
-  </div>
+  <nav class="topbar">
+    <a class="brand" href="index.html">writ</a>
+    <span class="tabs">
+      <a href="index.html">Overview</a>
+      <a href="merge.html">Merge</a>
+      <a href="contrast.html">Without review</a>
+      <a href="edits.html" aria-current="page">Policy</a>
+      <a href="explainer.html">Explainer</a>
+    </span>
+    <button class="theme" id="theme" type="button">Dark</button>
+  </nav>
+
+  <p class="pagesub">A fares policy taking seven edits. Wording merges on its own; meaning waits for a named person.</p>
 
   <div class="doc">
     <div class="doc-head">
@@ -181,10 +208,11 @@ body{
     <span class="kb"><i></i>blocked — the document keeps what it said</span>
   </div>
 
-  <p class="nav">
-    <a href="index.html">&larr; The same rule as geometry</a><br>
-    <a href="contrast.html">&larr; What it looks like without review</a>
-  </p>
+  <div class="morelinks">
+    <a href="index.html">← Overview</a>
+    <a href="merge.html">The same rule as geometry</a>
+    <a href="contrast.html">What it looks like without review</a>
+  </div>
 
   <p class="foot">
     Visual mockup from the Rebuild 2 collection, Helsinki 2026 —
@@ -553,6 +581,31 @@ body{
   if (reduced) { T = HOLD; toggle.textContent = 'Play'; }
   render(T); stamp();
   requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+(function () {
+  var root = document.documentElement, KEY = 'writ-theme';
+  var btn = document.getElementById('theme');
+  function isDark() {
+    var set = root.getAttribute('data-theme');
+    if (set) return set === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function label() {
+    var d = isDark();
+    btn.textContent = d ? 'Light' : 'Dark';
+    btn.setAttribute('aria-label', d ? 'Switch to the light theme' : 'Switch to the dark theme');
+  }
+  btn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    label();
+    window.dispatchEvent(new CustomEvent('writ:theme'));
+  });
+  label();
 })();
 </script>
 </body>

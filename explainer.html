@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Writ — Two ways to write together</title>
 <meta name="description" content="Visual mockup of the Writ explainer from Rebuild 2, Helsinki 2026. Not the Writ product.">
+<script>try{var t=localStorage.getItem('writ-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
 :root{
   --bg:#eae8e4;
@@ -29,6 +30,25 @@
   --olive:#687857;
   --node:#1e1e20;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --rule:rgba(26,26,28,0.14); --chip:rgba(26,26,28,0.07); --panel:rgba(26,26,28,0.025);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#17171a; --ink:#ece9e4; --muted:#8d8a86; --hair:#3a3936; --paper:#1f1f22;
+    --red:#d09090; --red-line:#c9767b; --red-soft:#57454a; --red-tint:#2e2426;
+    --green:#6fb98a; --green-dark:#8ecaa4; --green-soft:#3c5445; --green-tint:#222d26;
+    --amber:#d4a05f; --purple:#a186c9; --blue:#7d99bb; --plum:#c08a9e;
+    --teal:#8fadb0; --brown:#b09a7c; --olive:#94a583; --node:#e8e5e0;
+    --rule:rgba(236,233,228,0.16); --chip:rgba(236,233,228,0.09); --panel:rgba(236,233,228,0.03);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17171a; --ink:#ece9e4; --muted:#8d8a86; --hair:#3a3936; --paper:#1f1f22;
+  --red:#d09090; --red-line:#c9767b; --red-soft:#57454a; --red-tint:#2e2426;
+  --green:#6fb98a; --green-dark:#8ecaa4; --green-soft:#3c5445; --green-tint:#222d26;
+  --amber:#d4a05f; --purple:#a186c9; --blue:#7d99bb; --plum:#c08a9e;
+  --teal:#8fadb0; --brown:#b09a7c; --olive:#94a583; --node:#e8e5e0;
+  --rule:rgba(236,233,228,0.16); --chip:rgba(236,233,228,0.09); --panel:rgba(236,233,228,0.03);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -84,10 +104,10 @@ body{
 
 /* mock document */
 .doc{display:flex;flex-direction:column;gap:13px;padding-top:6px}
-.ln{position:relative;height:7px;border-radius:4px;background:#e4e2df;width:var(--w,90%)}
+.ln{position:relative;height:7px;border-radius:4px;background:var(--hair);width:var(--w,90%)}
 .ln--tintA{background:var(--red-tint)}
 .ln--tintB{background:var(--green-tint)}
-.ln--tintC{background:#e9e4f0}
+.ln--tintC{background:color-mix(in srgb,var(--purple) 20%,var(--paper))}
 .ln--struck::after{
   content:"";position:absolute;left:0;top:3px;width:62%;height:1px;
   background:var(--red-line);
@@ -109,7 +129,7 @@ body{
 .clash{
   position:absolute;left:var(--x);top:-9px;
   font-size:8.5px;font-weight:700;color:#fff;
-  background:#d4737e;padding:2px 7px;border-radius:999px;white-space:nowrap;
+  background:var(--red-line);padding:2px 7px;border-radius:999px;white-space:nowrap;
 }
 
 /* callout pills */
@@ -129,9 +149,9 @@ body{
 .branch{fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round}
 .trunk{stroke:var(--hair);stroke-width:1}
 .spur{fill:none;stroke:var(--purple);stroke-width:2;stroke-dasharray:6 5;stroke-linecap:round}
-.docicon{fill:#fff;stroke:var(--purple);stroke-width:1.4}
+.docicon{fill:var(--paper);stroke:var(--purple);stroke-width:1.4}
 .docrule{stroke:var(--purple);stroke-width:1;opacity:.55}
-.initial{font-family:var(--sans);font-size:9px;font-weight:700;fill:#fff;text-anchor:middle;letter-spacing:.03em}
+.initial{font-family:var(--sans);font-size:9px;font-weight:700;fill:var(--paper);text-anchor:middle;letter-spacing:.03em}
 
 /* ---------- scene 2 ---------- */
 .crowd{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 0 22px;flex-wrap:wrap}
@@ -154,21 +174,21 @@ body{
 .card{background:var(--paper);box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .card--source{
   width:min(340px,100%);text-align:center;
-  padding:11px 18px;font-size:13.5px;border:1px solid #e2e0dc;
+  padding:11px 18px;font-size:13.5px;border:1px solid var(--hair);
 }
 .stem{width:1px;height:14px;background:var(--hair)}
 .fork{display:block;width:100%;height:64px}
 .fork--up{height:64px}
-.fork path{fill:none;stroke:#b6b3ae;stroke-width:1;vector-effect:non-scaling-stroke}
+.fork path{fill:none;stroke:var(--hair);stroke-width:1;vector-effect:non-scaling-stroke}
 .stem-alt{display:none;width:1px;height:20px;background:var(--hair)}
 .edits{
   display:grid;grid-template-columns:1fr 1fr;gap:30px;width:100%;
 }
-.card--edit{border-radius:7px;padding:11px 13px;border:1px solid #e2e0dc}
+.card--edit{border-radius:7px;padding:11px 13px;border:1px solid var(--hair)}
 .card--edit.is-merged{border-color:var(--green-soft)}
 .card-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .card-head b{font-size:12.5px}
-.card--edit p{margin:0;font-size:12.5px;color:#3a3a3c}
+.card--edit p{margin:0;font-size:12.5px;color:var(--ink);opacity:.82}
 .badge{
   margin-left:auto;font-size:9.5px;font-weight:700;color:var(--green-dark);
   background:var(--green-tint);border:1px solid var(--green-soft);
@@ -176,24 +196,24 @@ body{
 }
 .node{
   position:relative;margin-top:-16px;
-  background:var(--node);color:#fff;border-radius:10px;
+  background:var(--node);color:var(--bg);border-radius:10px;
   padding:11px 20px;text-align:center;width:min(330px,100%);
 }
 .node b{display:block;font-size:13px;margin-bottom:3px}
-.node span{display:block;font-size:10px;color:#cfcdc9;white-space:nowrap}
+.node span{display:block;font-size:10px;color:var(--muted);white-space:nowrap}
 .legend{margin-top:6px;display:flex;justify-content:center;gap:14px;font-size:9.5px;font-weight:700}
 .legend>span{display:inline-block;white-space:nowrap}
 .legend i{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle}
-.lg-same{color:#fff}
-.lg-same i{background:#63b183}
-.lg-changed{color:#6d6b69}
-.lg-changed i{background:#6d6b69}
+.lg-same{color:var(--bg)}
+.lg-same i{background:var(--green)}
+.lg-changed{color:var(--muted)}
+.lg-changed i{background:var(--muted)}
 .tail{width:1px;height:38px;background:var(--amber);opacity:.8}
 
 /* ---------- caption ---------- */
 .caption{
   margin:34px auto 0;max-width:760px;
-  background:#343434;color:#fff;border-radius:999px;
+  background:var(--node);color:var(--bg);border-radius:999px;
   padding:11px 26px;text-align:center;
   font-size:clamp(14px,2.2vw,17px);
 }
@@ -226,9 +246,9 @@ body{
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes grow{from{opacity:0;transform:scaleY(0)}to{opacity:1;transform:scaleY(1)}}
 @keyframes resolve{
-  0%{opacity:0;transform:scale(.34);background:#b9b6b1}
-  45%{opacity:1;transform:scale(.34);background:#b9b6b1}
-  100%{opacity:1;transform:scale(1);background:#1e1e20}
+  0%{opacity:0;transform:scale(.34);background:var(--hair)}
+  45%{opacity:1;transform:scale(.34);background:var(--hair)}
+  100%{opacity:1;transform:scale(1);background:var(--node)}
 }
 
 .is-live .anim{animation:rise .55s cubic-bezier(.22,.9,.3,1) var(--d,0ms) both}
@@ -265,12 +285,38 @@ body{
   .is-live .anim,.is-live .anim-x,.is-live .anim-xr,
   .is-live .anim-pop,.is-live .anim-grow,.is-live .anim-node{animation:none}
   .is-live .draw{animation:none;stroke-dashoffset:0}
-  .node{background:#1e1e20}
+  .node{background:var(--node)}
 }
+
+.topbar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-bottom:13px;margin-bottom:22px;border-bottom:1px solid var(--rule);font-family:var(--sans)}
+.brand{font-size:17px;font-weight:600;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-right:auto}
+.tabs a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:999px;transition:color .2s,background-color .2s}
+.tabs a:hover{color:var(--ink);background:var(--panel)}
+.tabs a[aria-current="page"]{color:var(--ink);background:var(--chip)}
+.theme{font-family:var(--sans);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
+.theme:hover{color:var(--ink);border-color:var(--muted)}
+.morelinks{margin:30px auto 0;max-width:760px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-family:var(--sans)}
+.morelinks a{font-size:12.5px;color:var(--muted);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:6px 13px;transition:color .2s,border-color .2s,background-color .2s}
+.morelinks a:hover{color:var(--ink);border-color:var(--muted);background:var(--panel)}
+@media (max-width:620px){.tabs{width:100%;order:3;margin-right:0}}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <nav class="topbar">
+    <a class="brand" href="index.html">writ</a>
+    <span class="tabs">
+      <a href="index.html">Overview</a>
+      <a href="merge.html">Merge</a>
+      <a href="contrast.html">Without review</a>
+      <a href="edits.html">Policy</a>
+      <a href="explainer.html" aria-current="page">Explainer</a>
+    </span>
+    <button class="theme" id="theme" type="button">Dark</button>
+  </nav>
+
 
 <div class="stage" id="stage">
 
@@ -338,23 +384,23 @@ body{
                   d="M50 124 C 78 124 76 196 122 196 H 172 C 218 196 216 124 244 124"/>
 
             <g class="anim-pop" style="--d:2100ms;transform-origin:168px 52px">
-              <circle cx="168" cy="52" r="13" fill="#3f7d58"/>
+              <circle cx="168" cy="52" r="13" fill="var(--green)"/>
               <text class="initial" x="168" y="55.5">PV</text>
             </g>
             <g class="anim-pop" style="--d:2400ms;transform-origin:140px 196px">
-              <circle cx="140" cy="196" r="13" fill="#b57e34"/>
+              <circle cx="140" cy="196" r="13" fill="var(--amber)"/>
               <text class="initial" x="140" y="199.5">JO</text>
             </g>
 
             <g class="anim-pop" style="--d:3000ms;transform-origin:240px 124px">
-              <circle cx="240" cy="124" r="13" fill="#1e1e20"/>
-              <path d="M234 124.5 l4 4.5 l8 -9" fill="none" stroke="#fff" stroke-width="2"
+              <circle cx="240" cy="124" r="13" fill="var(--node)"/>
+              <path d="M234 124.5 l4 4.5 l8 -9" fill="none" stroke="var(--bg)" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round"/>
             </g>
 
             <path class="spur anim" style="--d:3600ms" d="M180 48 C 208 40 222 18 252 18 H 332"/>
             <g class="anim-pop" style="--d:4000ms;transform-origin:252px 18px">
-              <circle cx="252" cy="18" r="13" fill="#7a5aa3"/>
+              <circle cx="252" cy="18" r="13" fill="var(--purple)"/>
               <text class="initial" x="252" y="21.5">RK</text>
             </g>
             <g class="anim" style="--d:4400ms">
@@ -443,6 +489,12 @@ body{
   <button class="ctrl" id="toggle" type="button">Pause</button>
 </div>
 
+<div class="morelinks">
+  <a href="index.html">&larr; Overview</a>
+  <a href="merge.html">The rule as geometry</a>
+  <a href="edits.html">The rule on a real policy</a>
+</div>
+
 <p class="foot">
   Visual mockup of the Writ explainer from Rebuild 2, Helsinki, 2026. Not the Writ product.<br>
   <a href="https://github.com/rebuild-digital/Rebuild-2-Prototypes">rebuild-digital/Rebuild-2-Prototypes</a>
@@ -502,6 +554,31 @@ body{
 
   if (reduced) { toggle.textContent = 'Play'; }
   show(0);
+})();
+</script>
+
+<script>
+(function () {
+  var root = document.documentElement, KEY = 'writ-theme';
+  var btn = document.getElementById('theme');
+  function isDark() {
+    var set = root.getAttribute('data-theme');
+    if (set) return set === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function label() {
+    var d = isDark();
+    btn.textContent = d ? 'Light' : 'Dark';
+    btn.setAttribute('aria-label', d ? 'Switch to the light theme' : 'Switch to the dark theme');
+  }
+  btn.addEventListener('click', function () {
+    var next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+    label();
+    window.dispatchEvent(new CustomEvent('writ:theme'));
+  });
+  label();
 })();
 </script>
 </body>
