@@ -22,7 +22,7 @@ That rule is the whole argument, and each page shows it from a different distanc
 |---|---|
 | [`index.html`](index.html) | **Overview.** The product explained in words, with a static diagram of the rule and links into the other three pages. Start here. |
 | [`merge.html`](merge.html) | **Merge.** Six edits across a document. Wording flows straight through the review line; a change of meaning stops at it and waits for a named person, who approves or blocks. |
-| [`contrast.html`](contrast.html) | **Compared with a regular collaborative editor.** The same edits told twice, stacked. Above: an ordinary shared document, where edits interrupt each other mid-keystroke and the sentences garble — fourteen changes, none reviewed. Below: the same edits in Writ, branched and reviewed. |
+| [`contrast.html`](contrast.html) | **Compared with a regular collaborative editor.** The same three sentences and the same five editors, twice. Above: an ordinary shared document, where edits interrupt each other mid-keystroke and the sentences garble — fourteen changes, none reviewed. Below: the same text in Writ, where each edit is a margin proposal and a change of meaning opens a thread the editors argue out before the document moves. It ends 2 merged, 1 blocked, 1 still open, and every sentence still parses. |
 | [`edits.html`](edits.html) | **Example document: policy draft.** A short fares and concessions policy taking seven edits over forty-five seconds. Each editor types their proposal into the margin a character at a time; when an edit merges, the document deletes the words it is losing and types the words it is gaining. |
 
 Open any of them directly. No server, no install, no build.
@@ -36,13 +36,15 @@ Writ was one of six prototypes built in 48 hours at **Rebuild 2** in Helsinki, 3
 1 September 2026. The prototypes are collected at
 [rebuild-digital/Rebuild-2-Prototypes](https://github.com/rebuild-digital/Rebuild-2-Prototypes).
 
-`merge.html` and `contrast.html` are ports of the two authored animation scenes. The originals
-are React scenes rendered on a composition stage, delivered as self-extracting bundles that a
-browser can play but a person cannot read or diff. These are ports to plain SVG and DOM plus one
-`requestAnimationFrame` loop. **The geometry, every edit, every authored second and the scene
-cues are unchanged** — only the runtime is different.
+`merge.html`, and the upper half of `contrast.html`, are ports of the two authored animation
+scenes. The originals are React scenes rendered on a composition stage, delivered as
+self-extracting bundles that a browser can play but a person cannot read or diff. These are ports
+to plain SVG and DOM plus one `requestAnimationFrame` loop. **The geometry, every edit, every
+authored second and the scene cues are unchanged** — only the runtime is different.
 
-`index.html` and `edits.html` were built from scratch for this repo.
+`index.html`, `edits.html` and the lower half of `contrast.html` were built from scratch for this
+repo. The discussion in that lower half is invented: the philosophers' positions are real, but
+nobody said these words to each other in this form.
 
 ### A note on the sentences
 
@@ -82,6 +84,10 @@ Four things worth naming:
   not. Only the span that actually changed is retyped: the common head and tail stay put, so
   "within fourteen days of the claim" becoming "within 14 days of the claim" deletes eight
   characters and types two rather than rewriting the clause.
+- **Stage heights are locked, not fitted.** Both animations change the height of their own text
+  as they play — the shared document rewraps as it garbles, the Writ document as edits merge. If
+  the stage tracked that, everything below would jog up and down for the whole loop. Each stage
+  walks its own timeline once at startup, takes the tallest frame, and holds it.
 - **Colour lives in one place.** Every colour is a CSS custom property with a light and a dark
   value, including the ones inside the SVG. The animations read the tokens each frame, so the
   toggle takes effect mid-play without restarting anything. `prefers-reduced-motion` holds the

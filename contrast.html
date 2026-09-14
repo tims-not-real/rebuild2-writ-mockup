@@ -28,22 +28,22 @@
 :root{
   --bg:#faf9f6; --ink:#1c1b18; --muted:#77726a; --hair:rgba(28,27,24,0.18);
   --meaning:#b8781a; --wording:#2f7d4f; --blocked:#b3362b;
+  --tint-w:rgba(47,125,79,0.14); --tint-m:rgba(184,120,26,0.16); --tint-b:rgba(179,54,43,0.14);
   --rule:rgba(28,27,24,0.14); --chip:rgba(28,27,24,0.07); --panel:rgba(28,27,24,0.025);
-  --stroke:#1c1b18;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.18);
     --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+    --tint-w:rgba(95,185,129,0.17); --tint-m:rgba(227,166,58,0.17); --tint-b:rgba(226,107,95,0.17);
     --rule:rgba(236,232,223,0.16); --chip:rgba(236,232,223,0.09); --panel:rgba(236,232,223,0.03);
-    --stroke:#ece8df;
   }
 }
 :root[data-theme="dark"]{
   --bg:#141311; --ink:#ece8df; --muted:#8d887e; --hair:rgba(236,232,223,0.18);
   --meaning:#e3a63a; --wording:#5fb981; --blocked:#e26b5f;
+  --tint-w:rgba(95,185,129,0.17); --tint-m:rgba(227,166,58,0.17); --tint-b:rgba(226,107,95,0.17);
   --rule:rgba(236,232,223,0.16); --chip:rgba(236,232,223,0.09); --panel:rgba(236,232,223,0.03);
-  --stroke:#ece8df;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -93,16 +93,6 @@ h1{margin:0 0 8px;font-size:clamp(23px,3.6vw,30px);font-weight:600;letter-spacin
   font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   line-height:1.3;padding:0 5px;white-space:nowrap;color:var(--bg);background:var(--ink);
 }
-.zoom{position:absolute;inset:0}
-svg.diagram{position:absolute;left:0;top:0;overflow:visible}
-.lbl{position:absolute;font-size:13px;font-weight:400;color:var(--muted);line-height:1.3;white-space:nowrap}
-.handle-col{position:absolute;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
-.handle{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);white-space:nowrap;background:var(--bg);padding:1px 5px;margin:0 -5px}
-.prose{font-family:Newsreader,Georgia,serif;color:var(--ink);line-height:1.25;text-wrap:pretty;background:var(--bg);padding:1px 5px;margin:0 -5px}
-.prose s{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
-.chip{position:absolute;display:flex;font-weight:500;line-height:1.3;white-space:nowrap;transform-origin:left center}
-.chip span{white-space:pre}
-.chip .mono{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:400;color:var(--ink)}
 
 .controls{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
 .ctrl{
@@ -116,6 +106,77 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
 .foot{margin-top:32px;font-size:11.5px;color:var(--muted);line-height:1.6;max-width:70ch}
 .foot a{color:var(--muted)}
 @media (max-width:620px){.tabs{width:100%;order:3;margin-right:0}}
+
+/* ---------- stage 2: the same text, with threads ---------- */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:26px;align-items:stretch}
+.docwrap{border:1px solid var(--hair);display:flex;flex-direction:column}
+.docbody{flex:1;display:flex;align-items:center}
+.docbar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:9px 16px;border-bottom:1px solid var(--hair);font-size:12px;color:var(--muted);
+}
+.docbar .mono{font-size:12px}
+.docbar .st{display:flex;gap:14px;font-variant-numeric:tabular-nums}
+.docbar b{font-weight:500}
+.docbar .w b{color:var(--wording)}
+.docbar .m b{color:var(--meaning)}
+.docbar .b b{color:var(--blocked)}
+#docB{
+  font-family:Newsreader,Georgia,serif;font-size:clamp(18px,2.1vw,24px);
+  line-height:1.62;padding:22px 24px 24px;text-wrap:pretty;
+}
+#docB .slot{border-radius:2px;transition:background-color .5s ease,box-shadow .4s ease}
+#docB .slot.open{box-shadow:inset 0 -1px 0 0 var(--meaning)}
+#docB .slot.blocked{box-shadow:inset 0 -1px 0 0 var(--blocked)}
+.mk{
+  font-family:Inter,system-ui,sans-serif;font-size:.42em;font-weight:600;
+  vertical-align:super;margin-left:2px;color:var(--meaning);
+}
+.mk.blocked{color:var(--blocked)}
+.cur{display:none;width:1.5px;height:1em;vertical-align:text-bottom;background:var(--ink);margin:0 0 0 1px}
+.cur.on{display:inline-block}
+.slot.typing .cur{background:var(--wording)}
+.slot.deleting .cur{background:var(--blocked)}
+
+.rail{border:1px solid var(--hair);position:relative;overflow:hidden;height:452px}
+.railin{position:absolute;left:0;right:0;top:0;padding:15px 16px 16px;display:flex;flex-direction:column;gap:15px}
+.railcap{
+  position:absolute;left:0;right:0;top:0;z-index:2;
+  padding:8px 16px;border-bottom:1px solid var(--hair);background:var(--bg);
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.rail .railin{padding-top:44px}
+.thread{border-left:2px solid var(--rule);padding-left:11px}
+.thread.wording{border-left-color:var(--wording)}
+.thread.meaning{border-left-color:var(--meaning)}
+.thread.blocked{border-left-color:var(--blocked)}
+.th-head{display:flex;align-items:baseline;gap:7px;font-size:11px;color:var(--muted)}
+.th-mk{
+  font-size:9.5px;font-weight:600;color:var(--bg);background:var(--meaning);
+  border-radius:3px;padding:1px 5px;line-height:1.5;
+}
+.thread.blocked .th-mk{background:var(--blocked)}
+.th-prop{font-family:Newsreader,Georgia,serif;font-size:14.5px;line-height:1.4;margin:5px 0 5px}
+.th-prop s{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.th-prop ins{text-decoration:none}
+.thread.wording .th-prop ins{color:var(--wording)}
+.thread.meaning .th-prop ins{color:var(--meaning)}
+.thread.blocked .th-prop ins{color:var(--blocked)}
+.th-chip{font-size:11px;font-weight:500;line-height:1.4}
+.th-chip .sub{color:var(--muted);font-weight:400}
+.th-chip .nm2{color:var(--ink);font-weight:400}
+.msgs{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+.msg{
+  font-size:12.5px;line-height:1.5;background:var(--panel);
+  border-radius:3px;padding:7px 10px;
+}
+.msg .nm{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+.msg .cur{height:.9em;background:var(--muted)}
+
+@media (max-width:900px){
+  .cmp{grid-template-columns:minmax(0,1fr);gap:18px}
+  .rail{height:400px}
+}
 </style>
 </head>
 <body>
@@ -134,13 +195,13 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
 
   <h1>Compared with a regular collaborative editor</h1>
   <p class="pagesub">
-    The same three sentences, the same five editors, the same edits at the same seconds — told
-    twice. First the way an ordinary shared document handles them, then the way Writ does.
+    The same three sentences, the same five editors, the same disagreements &mdash; told twice.
+    First the way an ordinary shared document handles them, then the way Writ does.
   </p>
 
   <section class="stage stage--live">
     <div class="stage-head">
-      <span class="stage-n">01 · today</span>
+      <span class="stage-n">01 &middot; today</span>
       <h2>A regular collaborative editor</h2>
     </div>
     <p class="stage-note">
@@ -155,45 +216,64 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
     </div>
     <p class="verdict">
       Nobody agreed to any of this. <b>Fourteen changes, none reviewed</b>, and the sentences no
-      longer parse. The revert war is invisible in the text — you would have to read the history to
-      learn that two people disagreed about human nature.
+      longer parse. The disagreement is invisible in the text &mdash; you would have to read the
+      history to learn that two people were reverting each other about human nature.
     </p>
   </section>
 
   <section class="stage stage--writ">
     <div class="stage-head">
-      <span class="stage-n">02 · the alternative</span>
+      <span class="stage-n">02 &middot; the alternative</span>
       <h2>Writ</h2>
     </div>
     <p class="stage-note">
-      The same edits, each on its own branch. The document line runs left to right; the dashed
-      line is review.
+      The same sentences and the same people. Each edit is a proposal in the margin, and a change
+      of meaning opens a thread the editors have to talk through before the document moves.
     </p>
-    <div class="fit" id="fitB"><div class="piece" id="pieceB"></div></div>
+
+    <div class="cmp">
+      <div class="docwrap">
+        <div class="docbar">
+          <span class="mono">docs/first-principles.md</span>
+          <span class="st">
+            <span class="w"><b id="bMerged">0</b> merged</span>
+            <span class="m"><b id="bOpen">0</b> open</span>
+            <span class="b"><b id="bBlocked">0</b> blocked</span>
+          </span>
+        </div>
+        <div class="docbody"><div id="docB"></div></div>
+      </div>
+      <div class="rail" id="railB">
+        <div class="railcap">Threads</div>
+        <div class="railin" id="railinB"></div>
+      </div>
+    </div>
+
     <div class="controls">
       <button class="ctrl" id="toggleB" type="button">Pause</button>
       <input class="scrub" id="scrubB" type="range" min="0" max="1000" value="0" aria-label="Scrub the Writ animation">
       <span class="cue" id="cueB">0.0s</span>
     </div>
     <p class="verdict">
-      Agent tidy-ups flow straight through and merge. Every change of meaning stops at the review
-      line and waits for a named person: <b>@plato approves the one about Forms</b>, and
-      <b>@j-rousseau blocks the one about human nature</b>. The disagreement is now a decision
-      somebody made, attached to a name, instead of a keystroke that happened to land last.
+      The tidy-up merged without asking anyone. Each change of meaning opened a thread instead:
+      <b>@plato read @aristotle's case and approved it</b>, so the document moved.
+      <b>@j-rousseau argued with @t-hobbes and blocked</b>, so it did not &mdash; and the argument
+      is still there to read. <b>@f-nietzsche's is still open</b>, which is an honest state for a
+      document to be in. Three sentences, and every one of them still parses.
     </p>
   </section>
 
   <div class="morelinks">
     <a href="index.html">&larr; Overview</a>
     <a href="merge.html">The merge rule on its own</a>
-    <a href="edits.html">The rule on a real document</a>
+    <a href="edits.html">The rule on a longer document</a>
   </div>
 
   <p class="foot">
     Visual mockup from the Rebuild 2 collection, Helsinki 2026 &mdash;
     <a href="https://github.com/rebuild-digital/Rebuild-2-Prototypes">rebuild-digital/Rebuild-2-Prototypes</a>.
     Not the Writ product. Handles and sentences are paraphrases of real philosophical
-    disagreements, not quotations.
+    disagreements, not quotations; the discussion is invented.
   </p>
 
 </div>
@@ -355,25 +435,29 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
     resize();
   }
 
-  var lastFH = -1, curS = 1;
+  var curS = 1, boxH = 0;
   function resize() {
     if (!L) return;
     curS = Math.min(1, fit.clientWidth / L.w);
     piece.style.transform = 'scale(' + curS + ')';
-    lastFH = -1;
-    fitHeight();
+    applyBox();
   }
 
-  /* The authored slot is 380px tall because it sat in a fixed band. Standing on
-     its own the frame only needs its own height, so trim the stage to it. */
-  function fitHeight() {
+  /* The authored slot is 380px tall because it sat in a fixed band on a landing
+     page. Standing on its own the frame only needs its own height -- but the
+     paragraph rewraps as it garbles, so measuring per frame would jog the page.
+     Walk the whole loop once, take the tallest, and hold that. */
+  function lockBox() {
     if (!N) return;
-    var fh = N.frame.offsetHeight;
-    if (fh === lastFH) return;
-    lastFH = fh;
-    var h = Math.min(L.h, fh + 56);
-    fit.style.height = (h * curS) + 'px';
-    piece.style.top = (-((L.h - h) / 2) * curS) + 'px';
+    var max = 0;
+    for (var i = 0; i <= 60; i++) { render(TOTAL * i / 60); max = Math.max(max, N.frame.offsetHeight); }
+    boxH = Math.min(L.h, max + 48);
+    applyBox();
+  }
+  function applyBox() {
+    if (!boxH) return;
+    fit.style.height = (boxH * curS) + 'px';
+    piece.style.top = (-((L.h - boxH) / 2) * curS) + 'px';
   }
 
   function render(T) {
@@ -418,8 +502,6 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
         N.body.appendChild(c);
       });
     });
-
-    fitHeight();
   }
 
   /* ---------- playback ---------- */
@@ -459,7 +541,7 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
   var current = null;
   function ensure() {
     var want = fit.clientWidth >= 760 ? 'band' : 'hero';
-    if (want !== current) { current = want; build(want); } else resize();
+    if (want !== current) { current = want; build(want); lockBox(); } else resize();
     render(T); stamp();
   }
   window.addEventListener('resize', ensure);
@@ -468,368 +550,280 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
   if (reduced) { T = POSTER; toggle.textContent = 'Play'; render(T); stamp(); }
   requestAnimationFrame(frame);
 })();
+
 </script>
 
 <script>
 (function () {
   "use strict";
-  /* ---------- runtime ---------- */
+
   var clamp = function (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; };
-  var Easing = {
-    easeOutCubic:   function (u) { return 1 - Math.pow(1 - u, 3); },
-    easeInOutCubic: function (u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; },
-    easeOutBack:    function (u) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); }
-  };
-  function animate(o) {
-    return function (T) {
-      if (T <= o.start) return o.from;
-      if (T >= o.end) return o.to;
-      var u = (T - o.start) / (o.end - o.start);
-      return o.from + (o.to - o.from) * o.ease(u);
-    };
+  var easeOutCubic = function (u) { return 1 - Math.pow(1 - u, 3); };
+  function ramp(T, s, e) {
+    if (T <= s) return 0;
+    if (T >= e) return 1;
+    return easeOutCubic((T - s) / (e - s));
   }
 
-  /* ---------- scenes ---------- */
-  var SCENES = [
-    ['Document', 2.4], ['Edits', 4.1], ['Meaning', 3.1], ['Approval', 2.9],
-    ['Hobbes', 3], ['Nietzsche', 7.2], ['Reset', 1.5]
-  ];
-  var CUES = {}, TOTAL = 0;
-  SCENES.forEach(function (s) { CUES[s[0]] = TOTAL; TOTAL += s[1]; });
+  var DEL_RATE = 26, TYPE_RATE = 15, CHAT_RATE = 44;
 
-  /* ---------- geometry ---------- */
-  var LAYOUTS = {
-    band: { w:1116, h:380, y:190, x0:70, x1:1046, bxa:140, bxb:1020, rx:660, R:52, r:6.5, sw:2, up:[62,136], down:[50,100], fs:{prose:19,ui:13,mono:13} },
-    hero: { w:520,  h:470, y:235, x0:24, x1:496,  bxa:76,  bxb:440,  rx:245, R:34, r:5.5, sw:2, up:[62,150], down:[50,105], fs:{prose:15,ui:12,mono:12}, short:true }
-  };
-
-  var STOP = 1.5, PASS = 2.6, MERGE = 1.2;
-  var EDITS = [
-    { who:'agents/copyedit',  sign:-1, lane:0, kind:'wording', u0:0.00,  u1:0.86, t:2.0,  go:3.0 },
-    { who:'@aristotle',       sign: 1, lane:0, kind:'meaning', u0:0.045, u1:0.91, t:3.4,  go:5.0,  ok:9.6,  verdict:'approve', by:'@plato',
-      text:['Reality consists of ', 'Forms', 'the things we see', '.'] },
-    { who:'agents/line-edit', sign:-1, lane:1, kind:'wording', u0:0.18,  u1:0.98, t:7.0,  go:8.4 },
-    { who:'@t-hobbes',        sign: 1, lane:1, kind:'meaning', u0:0.14,  u1:0.95, t:9.4,  go:10.8, ok:14.4, verdict:'block',   by:'@j-rousseau',
-      text:['Man is by nature ', 'good', 'at war', '.'] },
-    { who:'@f-nietzsche',     sign: 1, lane:0, kind:'meaning', u0:0.07,  u1:0.93, t:15.0, go:16.6, ok:20.4, verdict:'block',   by:'agents/guidelines',
-      text:['Morality comes from ', 'God', 'the will to power', '.'] },
-    { who:'agents/citations', sign:-1, lane:0, kind:'wording', u0:0.30,  u1:1.00, t:16.8, go:18.0 }
+  /* The same three sentences the shared editor was mangling. */
+  var DOC = [
+    'Reality consists of ', { id:'forms', base:'Forms' }, '. ',
+    { id:'man', base:'Man' }, ' is by nature ', { id:'good', base:'good' },
+    '. Morality comes from ', { id:'god', base:'God' }, '.'
   ];
 
-  var MOTION = {
-    enter: function (T, s, e) { return animate({ from:0, to:1, start:s, end:e, ease:Easing.easeOutCubic })(T); },
-    draw:  function (T, s, e) { return animate({ from:0, to:1, start:s, end:e, ease:Easing.easeInOutCubic })(T); },
-    pop:   function (T, s, d, pulse) {
-      d = d || 0.45;
-      if (T <= s) return pulse ? 1 : 0;
-      var u = clamp((T - s) / d, 0, 1);
-      return pulse ? 1 + 0.32 * Math.sin(Math.PI * u) : Easing.easeOutBack(u);
-    }
-  };
+  /* Every edit opens a thread. A wording edit closes its own; a change of
+     meaning stays open until the person it names decides. */
+  var THREADS = [
+    { n:'', who:'agents/copyedit', seg:'man', kind:'wording',
+      from:'Man', to:'Humanity',
+      t:1.2, classify:2.4, decide:3.4, merge:3.6, msgs:[] },
 
-  var smooth = function (u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
-  function branchY(L, sign, rise, bx0, bx1, x) {
-    var f = 0;
-    if (x <= bx0 || x >= bx1) f = 0;
-    else if (x < bx0 + L.R) f = smooth((x - bx0) / L.R);
-    else if (x <= bx1 - L.R) f = 1;
-    else f = 1 - smooth((x - (bx1 - L.R)) / L.R);
-    return L.y - sign * rise * f;
+    { n:'1', who:'@aristotle', seg:'forms', kind:'meaning', by:'@plato', verdict:'approve',
+      from:'Forms', to:'the things we see',
+      t:5.0, classify:7.0, decide:15.6, merge:16.0,
+      msgs:[
+        { who:'@aristotle', t:7.8,  text:'Forms are a hypothesis. What we can actually point at is the things we see.' },
+        { who:'@plato',     t:11.6, text:'That is a real disagreement, not a tidy-up. For this document your version is the honest one.' }
+      ] },
+
+    { n:'2', who:'@t-hobbes', seg:'good', kind:'meaning', by:'@j-rousseau', verdict:'block',
+      from:'good', to:'at war',
+      t:18.5, classify:20.4, decide:33.0, merge:null,
+      msgs:[
+        { who:'@t-hobbes',   t:21.4, text:'Without a common power, life is a war of every man against every man.' },
+        { who:'@j-rousseau', t:25.0, text:'Man is born free. The war you describe comes after society, not before it.' },
+        { who:'@t-hobbes',   t:28.6, text:'Then we disagree about the starting point, not about the wording.' },
+        { who:'@j-rousseau', t:31.4, text:'Agreed. So the document should not assert either one. Blocking.' }
+      ] },
+
+    { n:'3', who:'@f-nietzsche', seg:'god', kind:'meaning', by:'@plato', verdict:null,
+      from:'God', to:'the will to power',
+      t:35.5, classify:37.4, decide:null, merge:null,
+      msgs:[
+        { who:'@f-nietzsche', t:38.4, text:'Morality has a genealogy. Calling it divine hides where it came from.' },
+        { who:'@plato',       t:42.2, text:'What changes downstream if we accept that? Ask me again when you know.' }
+      ] }
+  ];
+
+  var HOLD = 46.0, TOTAL = 53.0;
+
+  /* Retype only the span that changed; the common head and tail stay put. */
+  function diffOf(a, b) {
+    var p = 0;
+    while (p < a.length && p < b.length && a.charAt(p) === b.charAt(p)) p++;
+    var s = 0;
+    while (s < a.length - p && s < b.length - p &&
+           a.charAt(a.length - 1 - s) === b.charAt(b.length - 1 - s)) s++;
+    return { pre:a.slice(0, p), aMid:a.slice(p, a.length - s),
+             bMid:b.slice(p, b.length - s), post:a.slice(a.length - s) };
   }
-  function branchPts(L, sign, rise, bx0, bx1, xa, xb) {
-    var pts = [], n = Math.max(2, Math.ceil((xb - xa) / 4));
-    for (var i = 0; i <= n; i++) {
-      var x = xa + (xb - xa) * i / n;
-      pts.push(x.toFixed(1) + ',' + branchY(L, sign, rise, bx0, bx1, x).toFixed(2));
-    }
-    return pts.join(' ');
-  }
-  function invEase(ease, target) {
-    var lo = 0, hi = 1;
-    for (var i = 0; i < 40; i++) { var m = (lo + hi) / 2; if (ease(m) < target) lo = m; else hi = m; }
-    return (lo + hi) / 2;
-  }
+  THREADS.forEach(function (E) {
+    E.d = diffOf(E.from, E.to);
+    E.delDur = E.d.aMid.length / DEL_RATE;
+    E.typeDur = E.d.bMid.length / TYPE_RATE;
+    E.mergeDur = E.delDur + E.typeDur;
+    E.msgs.forEach(function (m) { m.dur = m.text.length / CHAT_RATE; });
+  });
+  var mergeBySlot = {};
+  THREADS.forEach(function (E) { if (E.merge != null) mergeBySlot[E.seg] = E; });
 
-  /* ---------- per-edit state at time T ---------- */
-  function editState(E, T, L, tok) {
-    var bx0 = L.bxa + E.u0 * (L.bxb - L.bxa), bx1 = L.bxa + E.u1 * (L.bxb - L.bxa);
-    var rise = (E.sign > 0 ? L.up : L.down)[E.lane];
-    var drawA = MOTION.draw(T, E.t, E.t + 1.1), drawB = MOTION.draw(T, E.t + 0.8, E.t + 1.8);
-    var gone = E.verdict === 'approve' ? 1 - MOTION.draw(T, E.ok + 0.8, E.ok + 1.2) : 1;
-    var handleOp = MOTION.enter(T, E.t + 1.0, E.t + 1.5) * gone;
-    var proseOp  = MOTION.enter(T, E.t + 1.6, E.t + 2.2) * gone;
-    var x, tCross, tArr = Infinity, stopped = false, decided = false, passed = false;
-    var fill = tok.ink, stroke = tok.ink;
+  /* ---------- build ---------- */
+  var docEl = document.getElementById('docB');
+  var railEl = document.getElementById('railB');
+  var innerEl = document.getElementById('railinB');
+  var slots = {};
 
-    if (E.kind === 'wording') {
-      var p = MOTION.draw(T, E.go, E.go + PASS);
-      x = bx0 + (bx1 - bx0) * p;
-      tCross = E.go + invEase(Easing.easeInOutCubic, (L.rx - bx0) / (bx1 - bx0)) * PASS;
-      passed = T >= tCross; tArr = E.go + PASS;
-      if (passed) { fill = tok.wording; stroke = tok.wording; }
-    } else {
-      tCross = E.go + STOP;
-      var p1 = MOTION.draw(T, E.go, tCross);
-      stopped = T >= tCross; decided = T >= E.ok;
-      x = bx0 + (L.rx - bx0) * p1;
-      if (E.verdict === 'approve') { var go2 = E.ok + 0.8; tArr = go2 + MERGE; x += (bx1 - L.rx) * MOTION.draw(T, go2, tArr); }
-      if (stopped) {
-        stroke = tok.meaning; fill = tok.bg;
-        if (decided) { fill = E.verdict === 'approve' ? tok.meaning : tok.blocked; if (E.verdict === 'block') stroke = tok.blocked; }
-      }
-    }
+  DOC.forEach(function (part) {
+    if (typeof part === 'string') { docEl.appendChild(document.createTextNode(part)); return; }
+    var wrap = document.createElement('span');
+    wrap.className = 'slot';
+    var pre = document.createElement('span'), mid = document.createElement('span');
+    var cur = document.createElement('i'); cur.className = 'cur';
+    var post = document.createElement('span');
+    var mk = document.createElement('sup'); mk.className = 'mk';
+    pre.textContent = part.base;
+    wrap.appendChild(pre); wrap.appendChild(mid); wrap.appendChild(cur);
+    wrap.appendChild(post); wrap.appendChild(mk);
+    slots[part.id] = { wrap:wrap, pre:pre, mid:mid, cur:cur, post:post, mk:mk, base:part.base, last:null };
+    docEl.appendChild(wrap);
+  });
 
-    var y = branchY(L, E.sign, rise, bx0, bx1, x);
-    var tEnd = E.verdict === 'block' ? E.ok + 1.4 : tArr;
-    var branchOp = 1 - MOTION.draw(T, tEnd + 0.2, tEnd + 0.9);
-    var nodeIn = MOTION.pop(T, E.go - 0.45);
-    var nodeOut = E.verdict === 'block' ? branchOp : 1 - MOTION.draw(T, tArr, tArr + 0.3);
-    var pulse = ((stopped || passed) ? MOTION.pop(T, tCross, 0.5, true) : 1) * (decided ? MOTION.pop(T, E.ok, 0.5, true) : 1);
-    var nodeScale = nodeIn * nodeOut * pulse;
-    var dashedOp = E.kind === 'meaning'
-      ? MOTION.enter(T, tCross + 0.1, tCross + 0.5) * (E.verdict === 'approve' ? 1 - MOTION.draw(T, E.ok + 0.3, E.ok + 0.7) : branchOp)
-      : 0;
+  var cards = THREADS.map(function (E) {
+    var card = document.createElement('div');
+    card.className = 'thread ' + E.kind;
 
-    var chip, chipOp;
-    if (E.kind === 'wording') {
-      chip = [['wording', tok.wording]];
-      chipOp = MOTION.enter(T, tCross, tCross + 0.3) * (1 - MOTION.draw(T, tCross + 1.0, tCross + 1.3));
-    } else {
-      chipOp = MOTION.enter(T, tCross + 0.2, tCross + 0.6) * branchOp * (E.verdict === 'approve' ? 1 - MOTION.draw(T, E.ok + 0.8, E.ok + 1.2) : 1);
-      if (!decided) chip = [['meaning', tok.meaning], [' · needs ', tok.muted], [E.by, 'mono']];
-      else if (E.verdict === 'approve') chip = [['meaning', tok.meaning], [' · ', tok.muted], [E.by, 'mono'], [' approved', tok.meaning]];
-      else chip = L.short
-        ? [['meaning', tok.meaning], [' · ', tok.muted], [E.by, 'mono'], [' blocked', tok.blocked]]
-        : [['meaning', tok.meaning], [' · blocked by ', tok.blocked], [E.by, 'mono']];
-    }
-    var chipScale = decided ? Math.min(MOTION.pop(T, E.ok, 0.5, true), 1.12) : 1;
+    var head = document.createElement('div');
+    head.className = 'th-head';
+    var mk = document.createElement('span'); mk.className = 'th-mk'; mk.textContent = E.n;
+    var who = document.createElement('span'); who.className = 'mono'; who.textContent = E.who;
+    if (E.n) head.appendChild(mk);
+    head.appendChild(who);
 
-    return { bx0:bx0, bx1:bx1, rise:rise, drawA:drawA, drawB:drawB, handleOp:handleOp, proseOp:proseOp,
-             x:x, y:y, fill:fill, stroke:stroke, nodeScale:nodeScale, branchOp:branchOp, dashedOp:dashedOp,
-             chip:chip, chipOp:chipOp, chipScale:chipScale, tArr:tArr };
-  }
+    var prop = document.createElement('div');
+    prop.className = 'th-prop';
+    var del = document.createElement('s'); del.textContent = E.from;
+    var ins = document.createElement('ins'); ins.textContent = E.to;
+    prop.appendChild(del); prop.appendChild(document.createTextNode(' ')); prop.appendChild(ins);
 
-  /* ---------- build the DOM once per layout ---------- */
-  var SVGNS = 'http://www.w3.org/2000/svg';
-  var piece = document.getElementById('pieceB');
-  var fit = document.getElementById('fitB');
-  var L = null, tok = null, N = null;
+    var chip = document.createElement('div'); chip.className = 'th-chip';
 
-  function tokens() {
-    var cs = getComputedStyle(document.documentElement);
-    var g = function (n) { return cs.getPropertyValue(n).trim(); };
-    return { bg:g('--bg'), ink:g('--ink'), muted:g('--muted'), hair:g('--stroke'),
-             meaning:g('--meaning'), wording:g('--wording'), blocked:g('--blocked') };
-  }
-
-  function line() {
-    var el = document.createElementNS(SVGNS, 'polyline');
-    el.setAttribute('fill', 'none');
-    el.setAttribute('stroke-linecap', 'round');
-    el.setAttribute('stroke-linejoin', 'round');
-    return el;
-  }
-  function setLine(el, pts, color, w, p, dashed, opacity) {
-    var drawing = p < 1;
-    el.setAttribute('points', pts);
-    el.setAttribute('stroke', color);
-    el.setAttribute('stroke-width', w);
-    if (drawing) {
-      el.setAttribute('pathLength', '1');
-      el.setAttribute('stroke-dasharray', '1');
-      el.setAttribute('stroke-dashoffset', String(1 - p));
-    } else {
-      el.removeAttribute('pathLength');
-      el.removeAttribute('stroke-dashoffset');
-      if (dashed) el.setAttribute('stroke-dasharray', '5 7'); else el.removeAttribute('stroke-dasharray');
-    }
-    el.style.opacity = opacity == null ? (p > 0 ? 1 : 0) : opacity;
-  }
-
-  function build(layoutName) {
-    L = LAYOUTS[layoutName];
-    tok = tokens();
-    piece.innerHTML = '';
-    piece.style.width = L.w + 'px';
-    piece.style.height = L.h + 'px';
-    piece.style.background = tok.bg;
-
-    var zoom = document.createElement('div');
-    zoom.className = 'zoom';
-    zoom.style.transformOrigin = L.rx + 'px ' + (L.y - L.up[0] * 0.5) + 'px';
-    piece.appendChild(zoom);
-
-    var svg = document.createElementNS(SVGNS, 'svg');
-    svg.setAttribute('class', 'diagram');
-    svg.setAttribute('width', L.w); svg.setAttribute('height', L.h);
-    svg.setAttribute('viewBox', '0 0 ' + L.w + ' ' + L.h);
-    zoom.appendChild(svg);
-
-    var said = line(), proposed = line(), review = line();
-    svg.appendChild(said); svg.appendChild(proposed); svg.appendChild(review);
-
-    var branches = EDITS.map(function () {
-      var g = document.createElementNS(SVGNS, 'g');
-      var a = line(), b = line(), d = line();
-      g.appendChild(a); g.appendChild(b); g.appendChild(d);
-      svg.appendChild(g);
-      return { g:g, a:a, b:b, d:d };
-    });
-    var nodes = EDITS.map(function () {
-      var c = document.createElementNS(SVGNS, 'circle');
-      c.setAttribute('r', L.r); c.setAttribute('stroke-width', L.sw);
-      svg.appendChild(c);
-      return c;
+    var msgs = document.createElement('div'); msgs.className = 'msgs';
+    var bubbles = E.msgs.map(function (m) {
+      var el = document.createElement('div'); el.className = 'msg';
+      var nm = document.createElement('span'); nm.className = 'nm mono'; nm.textContent = m.who;
+      var tx = document.createElement('span'); tx.className = 'tx';
+      var cur = document.createElement('i'); cur.className = 'cur';
+      el.appendChild(nm); el.appendChild(tx); el.appendChild(cur);
+      msgs.appendChild(el);
+      return { el:el, tx:tx, cur:cur, len:-1 };
     });
 
-    function mk(cls) { var d = document.createElement('div'); d.className = cls; zoom.appendChild(d); return d; }
+    card.appendChild(head); card.appendChild(prop); card.appendChild(chip); card.appendChild(msgs);
+    innerEl.appendChild(card);
+    return { card:card, chip:chip, sig:null, bubbles:bubbles };
+  });
 
-    var lblSaid = mk('lbl'), lblProp = mk('lbl'), lblRev = mk('lbl');
-    lblSaid.textContent = 'what it says'; lblProp.textContent = 'proposed'; lblRev.textContent = 'review';
-    [lblSaid, lblProp, lblRev].forEach(function (e) { e.style.fontSize = L.fs.ui + 'px'; });
-    lblSaid.style.left = L.x0 + 'px'; lblSaid.style.top = (L.y - 26) + 'px';
-    lblProp.style.right = (L.w - L.x1) + 'px'; lblProp.style.top = (L.short ? L.y + 10 : L.y - 26) + 'px';
-    lblRev.style.left = (L.rx + 9) + 'px'; lblRev.style.top = '10px';
-
-    var cols = EDITS.map(function (E) {
-      var col = mk('handle-col');
-      var h = document.createElement('div');
-      h.className = 'handle'; h.style.fontSize = L.fs.mono + 'px'; h.textContent = E.who;
-      col.appendChild(h);
-      var pr = null;
-      if (E.text) {
-        pr = document.createElement('div');
-        pr.className = 'prose'; pr.style.fontSize = L.fs.prose + 'px';
-        pr.appendChild(document.createTextNode(E.text[0]));
-        var st = document.createElement('s'); st.textContent = E.text[1]; pr.appendChild(st);
-        pr.appendChild(document.createTextNode(' ' + E.text[2] + E.text[3]));
-        col.appendChild(pr);
-      }
-      return { col:col, h:h, pr:pr };
+  function setChip(c, parts) {
+    var sig = parts.map(function (p) { return p[0] + '|' + p[1]; }).join('~');
+    if (sig === c.sig) return;
+    c.sig = sig;
+    c.chip.innerHTML = '';
+    parts.forEach(function (p) {
+      var s = document.createElement('span');
+      s.textContent = p[0];
+      if (p[1] === 'sub') s.className = 'sub';
+      else if (p[1] === 'nm') s.className = 'nm2 mono';
+      else s.style.color = p[1];
+      c.chip.appendChild(s);
     });
-
-    var chips = EDITS.map(function () {
-      var c = mk('chip'); c.style.fontSize = L.fs.ui + 'px';
-      return { el:c, sig:null };
-    });
-
-    N = { zoom:zoom, said:said, proposed:proposed, review:review, branches:branches, nodes:nodes,
-          lblSaid:lblSaid, lblProp:lblProp, lblRev:lblRev, cols:cols, chips:chips };
-    resize();
   }
 
-  function resize() {
-    if (!L) return;
-    var w = fit.clientWidth;
-    var s = Math.min(1, w / L.w);
-    piece.style.transform = 'scale(' + s + ')';
-    fit.style.height = (L.h * s) + 'px';
-  }
+  var cMerged = document.getElementById('bMerged');
+  var cOpen = document.getElementById('bOpen');
+  var cBlocked = document.getElementById('bBlocked');
 
-  /* ---------- render one frame ---------- */
-  function rises(el, o) { el.style.opacity = o; el.style.transform = 'translateY(' + ((1 - o) * 6) + 'px)'; }
-
+  /* ---------- render ---------- */
   function render(T) {
-    tok = tokens();
-    piece.style.background = tok.bg;
-    var mainP = MOTION.draw(T, 0, 1.4);
-    var endLbl = MOTION.enter(T, 1.1, 1.9);
-    var revP = MOTION.draw(T, 1.5, 2.4);
-    var revLbl = MOTION.enter(T, 2.0, 2.4);
-    var S = EDITS.map(function (E) { return editState(E, T, L, tok); });
-    var merges = S.filter(function (s) { return isFinite(s.tArr); });
-    var faintOp = 0.28 + merges.reduce(function (a, s) { return a + (0.72 / merges.length) * MOTION.draw(T, s.tArr, s.tArr + 0.4); }, 0);
-    var zoomV = 1 + 0.04 * MOTION.draw(T, CUES.Meaning, CUES.Meaning + 2.4) - 0.04 * MOTION.draw(T, CUES.Approval, CUES.Approval + 1.6);
-    var fade = 1 - MOTION.draw(T, CUES.Reset + 0.2, CUES.Reset + 1.2);
+    var css = getComputedStyle(document.documentElement);
+    var WORDING = css.getPropertyValue('--wording').trim();
+    var MEANING = css.getPropertyValue('--meaning').trim();
 
-    piece.style.opacity = fade;
-    N.zoom.style.transform = 'scale(' + zoomV + ')';
+    var merged = 0, open = 0, blocked = 0;
+    var tint = {}, mark = {};
+    Object.keys(slots).forEach(function (id) { tint[id] = null; mark[id] = ['', '']; });
 
-    var segP = function (a, b) { return clamp((mainP * (L.x1 - L.x0) - (a - L.x0)) / (b - a), 0, 1); };
-    setLine(N.said, L.x0 + ',' + L.y + ' ' + L.rx + ',' + L.y, tok.hair, L.sw, segP(L.x0, L.rx));
-    var pp = segP(L.rx, L.x1);
-    setLine(N.proposed, L.rx + ',' + L.y + ' ' + L.x1 + ',' + L.y, tok.hair, L.sw, pp, false, pp > 0 ? faintOp : 0);
-    setLine(N.review, L.rx + ',22 ' + L.rx + ',' + (L.h - 22), tok.muted, 1.5, revP, true);
+    THREADS.forEach(function (E, i) {
+      var c = cards[i];
+      var appear = ramp(T, E.t, E.t + 0.5);
+      c.card.style.opacity = appear;
+      c.card.style.display = T >= E.t - 0.05 ? 'block' : 'none';
 
-    EDITS.forEach(function (E, i) {
-      var s = S[i], b = N.branches[i];
-      b.g.style.opacity = s.branchOp;
-      setLine(b.a, branchPts(L, E.sign, s.rise, s.bx0, s.bx1, s.bx0, L.rx), tok.hair, L.sw, s.drawA);
-      setLine(b.b, branchPts(L, E.sign, s.rise, s.bx0, s.bx1, L.rx, s.bx1), tok.hair, L.sw, s.drawB, false, s.drawB > 0 ? 1 - s.dashedOp : 0);
-      if (E.kind === 'meaning') {
-        var col = (E.verdict === 'block' && T >= E.ok) ? tok.blocked : tok.meaning;
-        setLine(b.d, branchPts(L, E.sign, s.rise, s.bx0, s.bx1, L.rx, s.bx1), col, L.sw, 1, true, s.dashedOp);
+      var classified = T >= E.classify;
+      var decided = E.decide != null && T >= E.decide;
+      var merging = E.merge != null && T >= E.merge;
+
+      var cls = 'thread ' + E.kind, parts;
+      if (!classified) {
+        parts = [['reading the change', 'sub']];
+      } else if (E.kind === 'wording') {
+        parts = decided ? [['wording', WORDING], [' \u00b7 merged, nobody asked', 'sub']]
+                        : [['wording', WORDING], [' \u00b7 same meaning', 'sub']];
+      } else if (!decided) {
+        parts = [['meaning changed', MEANING], [' \u00b7 open with ', 'sub'], [E.by, 'nm']];
+        cls = 'thread meaning open';
+      } else if (E.verdict === 'approve') {
+        parts = [['meaning changed', MEANING], [' \u00b7 ', 'sub'], [E.by, 'nm'], [' approved', MEANING]];
       } else {
-        b.d.style.opacity = 0;
+        parts = [['meaning changed', MEANING], [' \u00b7 blocked by ', 'sub'], [E.by, 'nm']];
+        cls = 'thread blocked';
       }
+      setChip(c, parts);
+      if (c.card.className !== cls) c.card.className = cls;
 
-      var c = N.nodes[i];
-      c.setAttribute('cx', s.x); c.setAttribute('cy', s.y);
-      c.setAttribute('fill', s.fill); c.setAttribute('stroke', s.stroke);
-      c.style.transformOrigin = s.x + 'px ' + s.y + 'px';
-      c.style.transform = 'scale(' + s.nodeScale + ')';
+      /* the conversation, typed */
+      E.msgs.forEach(function (m, j) {
+        var bb = c.bubbles[j];
+        var on = T >= m.t;
+        bb.el.style.display = on ? 'block' : 'none';
+        if (!on) { if (bb.len !== 0) { bb.tx.textContent = ''; bb.len = 0; } bb.cur.className = 'cur'; return; }
+        var k = Math.floor((T - m.t) * CHAT_RATE);
+        var shown = clamp(k, 0, m.text.length);
+        if (shown !== bb.len) { bb.tx.textContent = m.text.slice(0, shown); bb.len = shown; }
+        bb.cur.className = 'cur' + (k < m.text.length ? ' on' : '');
+      });
 
-      var by = L.y - E.sign * s.rise, below = E.sign < 0 || E.lane === 1;
-      var col2 = N.cols[i];
-      col2.col.style.opacity = s.branchOp;
-      col2.col.style.left = (s.bx0 + L.R + 4) + 'px';
-      col2.col.style.maxWidth = ((E.text && L.short ? L.w - 16 : L.rx - 12) - (s.bx0 + L.R + 4)) + 'px';
-      if (below) { col2.col.style.top = (by + 8) + 'px'; col2.col.style.transform = 'none'; }
-      else { col2.col.style.top = (by - 8) + 'px'; col2.col.style.transform = 'translateY(-100%)'; }
-      rises(col2.h, s.handleOp);
-      if (col2.pr) rises(col2.pr, s.proseOp);
-
-      var onLine = E.kind === 'meaning';
-      var ch = N.chips[i];
-      var sig = s.chip.map(function (p) { return p[0] + '|' + p[1]; }).join('~');
-      if (sig !== ch.sig) {
-        ch.sig = sig;
-        ch.el.innerHTML = '';
-        s.chip.forEach(function (p) {
-          var sp = document.createElement('span');
-          sp.textContent = p[0];
-          if (p[1] === 'mono') sp.className = 'mono';
-          else { sp.style.color = p[1]; sp.style.fontWeight = (p[1] === tok.muted) ? 400 : 500; }
-          ch.el.appendChild(sp);
-        });
+      if (merging) {
+        merged++;
+        var fresh = 1 - clamp((T - (E.merge + E.mergeDur)) / 1.4, 0, 1);
+        if (fresh > 0) tint[E.seg] = E.kind === 'meaning' ? 'var(--tint-m)' : 'var(--tint-w)';
+      } else if (classified && E.kind === 'meaning' && !decided) {
+        open++;
+        tint[E.seg] = 'var(--tint-m)';
+        mark[E.seg] = [E.n, 'open'];
+      } else if (decided && E.verdict === 'block') {
+        blocked++;
+        tint[E.seg] = 'var(--tint-b)';
+        mark[E.seg] = [E.n, 'blocked'];
       }
-      ch.el.style.left = (L.rx + 12) + 'px';
-      ch.el.style.top = (onLine ? by : (E.sign > 0 ? by - 8 : by + 8)) + 'px';
-      ch.el.style.transform = (onLine ? 'translateY(-50%) ' : (E.sign > 0 ? 'translateY(-100%) ' : '')) + 'scale(' + s.chipScale + ')';
-      ch.el.style.opacity = s.chipOp;
-      ch.el.style.background = onLine ? tok.bg : 'transparent';
-      ch.el.style.padding = L.short ? '1px 4px' : '1px 6px';
-      ch.el.style.color = tok.ink;
     });
 
-    rises(N.lblSaid, endLbl); rises(N.lblProp, endLbl); rises(N.lblRev, revLbl);
+    /* the document: delete what it loses, type what it gains */
+    Object.keys(slots).forEach(function (id) {
+      var S = slots[id], E = mergeBySlot[id];
+      var pre = S.base, mid = '', post = '', state = '';
+      if (E && T >= E.merge) {
+        var dt = T - E.merge, d = E.d;
+        pre = d.pre; post = d.post;
+        if (dt < E.delDur) {
+          mid = d.aMid.slice(0, Math.max(d.aMid.length - Math.floor(dt * DEL_RATE), 0));
+          state = 'deleting';
+        } else {
+          var k = Math.floor((dt - E.delDur) * TYPE_RATE);
+          mid = d.bMid.slice(0, Math.min(k, d.bMid.length));
+          if (k < d.bMid.length) state = 'typing';
+        }
+      }
+      var sig = pre + '\u0001' + mid + '\u0001' + post;
+      if (sig !== S.last) {
+        S.pre.textContent = pre; S.mid.textContent = mid; S.post.textContent = post;
+        S.last = sig;
+      }
+      S.cur.className = 'cur' + (state ? ' on' : '');
+      S.mk.textContent = mark[id][0];
+      S.mk.className = 'mk' + (mark[id][1] ? ' ' + mark[id][1] : '');
+      S.wrap.className = 'slot' + (state ? ' ' + state : '') + (mark[id][1] ? ' ' + mark[id][1] : '');
+      S.wrap.style.backgroundColor = tint[id] || 'transparent';
+    });
+
+    cMerged.textContent = merged;
+    cOpen.textContent = open;
+    cBlocked.textContent = blocked;
+
+    /* follow the conversation: keep the newest message in view */
+    var over = innerEl.offsetHeight - railEl.clientHeight;
+    innerEl.style.transform = 'translateY(' + (over > 0 ? -over : 0) + 'px)';
   }
 
   /* ---------- playback ---------- */
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var POSTER = CUES.Meaning + 2.6;
   var T = 0, playing = !reduced, last = null;
   var toggle = document.getElementById('toggleB');
   var scrub = document.getElementById('scrubB');
   var cueEl = document.getElementById('cueB');
 
-  function sceneName(t) {
-    var name = SCENES[0][0], acc = 0;
-    for (var i = 0; i < SCENES.length; i++) { if (t >= acc) name = SCENES[i][0]; acc += SCENES[i][1]; }
-    return name;
-  }
   function stamp() {
-    cueEl.textContent = T.toFixed(1) + 's ' + sceneName(T);
+    cueEl.textContent = T.toFixed(1) + 's';
     scrub.value = Math.round((T / TOTAL) * 1000);
   }
-
   function frame(ts) {
     if (last == null) last = ts;
     var dt = (ts - last) / 1000; last = ts;
     if (playing) { T = (T + dt) % TOTAL; render(T); stamp(); }
     requestAnimationFrame(frame);
   }
-
   toggle.addEventListener('click', function () {
     playing = !playing;
     toggle.textContent = playing ? 'Pause' : 'Play';
@@ -840,26 +834,12 @@ svg.diagram{position:absolute;left:0;top:0;overflow:visible}
     render(T); stamp();
   });
 
-  function pick() { return fit.clientWidth >= 760 ? 'band' : 'hero'; }
-  var current = null;
-  function ensure() {
-    var want = pick();
-    if (want !== current) { current = want; build(want); }
-    else resize();
-    render(T); stamp();
-  }
+  /* The row is as tall as the threads rail, which is fixed, so the document
+     block never changes height and the page never jogs. */
+  window.addEventListener('resize', function () { render(T); });
 
-  window.addEventListener('resize', ensure);
-  if (window.matchMedia) {
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    var onTheme = function () { current = null; ensure(); };
-    if (mq.addEventListener) mq.addEventListener('change', onTheme);
-    else if (mq.addListener) mq.addListener(onTheme);
-    window.addEventListener('writ:theme', onTheme);
-  }
-
-  ensure();
-  if (reduced) { T = POSTER; toggle.textContent = 'Play'; render(T); stamp(); }
+  if (reduced) { T = HOLD; toggle.textContent = 'Play'; }
+  render(T); stamp();
   requestAnimationFrame(frame);
 })();
 </script>
